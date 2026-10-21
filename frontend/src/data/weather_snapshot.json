@@ -1,0 +1,52 @@
+{
+  "Kalimantan Tengah": {
+    "city": "Palangka Raya",
+    "lat": -2.21,
+    "lon": 113.92,
+    "temp": 32.0,
+    "humidity": 58,
+    "rain": 0.0,
+    "wind_speed": 6.4,
+    "pressure": 1012.0
+  },
+  "Kalimantan Barat": {
+    "city": "Pontianak",
+    "lat": -0.02,
+    "lon": 109.34,
+    "temp": 26.9,
+    "humidity": 84,
+    "rain": 0.2,
+    "wind_speed": 5.8,
+    "pressure": 1015.1
+  },
+  "Kalimantan Selatan": {
+    "city": "Banjarmasin",
+    "lat": -3.32,
+    "lon": 114.59,
+    "temp": 33.5,
+    "humidity": 45,
+    "rain": 0.0,
+    "wind_speed": 9.6,
+    "pressure": 1013.1
+  },
+  "Kalimantan Timur": {
+    "city": "Samarinda",
+    "lat": -0.5,
+    "lon": 117.15,
+    "temp": 30.8,
+    "humidity": 70,
+    "rain": 0.1,
+    "wind_speed": 10.5,
+    "pressure": 1012.6
+  },
+  "Kalimantan Utara": {
+    "city": "Tanjung Selor",
+    "lat": 2.84,
+    "lon": 117.37,
+    "temp": 28.8,
+    "humidity": 78,
+    "rain": 0.0,
+    "wind_speed": 3.8,
+    "pressure": 1013.1
+  }
+}
