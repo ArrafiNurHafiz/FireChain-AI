@@ -78,14 +78,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "FireChain AI" },
-      { name: "description", content: "Deteksi kebakaran hutan Kalimantan" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "FireChain AI" },
-      { property: "og:description", content: "Deteksi kebakaran hutan Kalimantan" },
+      { title: "FireChain AI — Real-Time Peatland Wildfire & Climate Ledger" },
+      { name: "description", content: "Real-Time Kalimantan Peatland Wildfire Surveillance, NASA FIRMS Telemetry, AI PeatNet Early Warning, and Polygon On-Chain MRV Carbon Ledger." },
+      { property: "og:title", content: "FireChain AI — Peatland Wildfire & Climate Ledger" },
+      { property: "og:description", content: "Real-Time Kalimantan Peatland Wildfire Surveillance, NASA FIRMS Telemetry, AI PeatNet Early Warning, and Polygon On-Chain MRV Carbon Ledger." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -105,7 +103,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="id" className="dark">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>

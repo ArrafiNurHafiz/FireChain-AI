@@ -18,14 +18,14 @@ export interface AIFirePredictionResult {
   smoldering_probability_pct: number; // 0 - 100%
   spread_rate_m_hr: number; // meters per hour
   escalation_risk_score: number; // 0 - 100
-  risk_level: "Rendah" | "Sedang" | "Tinggi" | "Sangat Tinggi" | "Kritis";
+  risk_level: "Low" | "Moderate" | "High" | "Very High" | "Critical";
   feature_importances: {
     feature: string;
     impact_pct: number;
     direction: "increases_risk" | "reduces_risk";
   }[];
   tactical_directive: string;
-  suppression_priority: "P1 - Intervensi Cepat" | "P2 - Patroli Terpadu" | "P3 - Monitoring Rutin";
+  suppression_priority: "P1 - Rapid Intervention" | "P2 - Coordinated Patrol" | "P3 - Routine Monitoring";
 }
 
 // Empirical feature baseline distributions for tropical peatlands (CIFOR / IPB datasets)
@@ -130,43 +130,43 @@ export function predictPeatFireEscalation(
   const riskScore = Math.min(100, Math.max(8, compositeRisk));
 
   // Determine Level & Directives
-  let riskLevel: AIFirePredictionResult["risk_level"] = "Rendah";
-  let priority: AIFirePredictionResult["suppression_priority"] = "P3 - Monitoring Rutin";
+  let riskLevel: AIFirePredictionResult["risk_level"] = "Low";
+  let priority: AIFirePredictionResult["suppression_priority"] = "P3 - Routine Monitoring";
   let directive =
-    "Kadar air serasah cukup aman. Lanjutkan pemantauan lintas satelit berkala tanpa pengerahan armada berat.";
+    "Fuel moisture adequate. Continue periodic orbital monitoring without heavy fleet deployment.";
 
   if (riskScore >= 80) {
-    riskLevel = "Kritis";
-    priority = "P1 - Intervensi Cepat";
+    riskLevel = "Critical";
+    priority = "P1 - Rapid Intervention";
     directive =
-      "PROBABILITAS SMOLDERING KRITIS: Api terindikasi kuat menembus lapisan gambut bawah tanah. Segera mobilisasi Water Bombing udara dan penyekatan kanal parit basah berkedalaman 2 meter.";
+      "CRITICAL SMOLDERING PROBABILITY: Severe risk of subterranean peat fire penetration. Deploy aerial water bombing and 2-meter deep trench canal blocking immediately.";
   } else if (riskScore >= 65) {
-    riskLevel = "Sangat Tinggi";
-    priority = "P1 - Intervensi Cepat";
+    riskLevel = "Very High";
+    priority = "P1 - Rapid Intervention";
     directive =
-      "RISIKO PERAMBATAN CEPAT: Angin kencang dan kekeringan gambut memicu lompatan api permukaan (spotting). Turunkan regu darat Manggala Agni dengan pompa apung tekanan tinggi.";
+      "HIGH SPREAD VELOCITY: High winds and dry peat surface trigger spotting flares. Mobilize ground crew with high-pressure floating pumps.";
   } else if (riskScore >= 45) {
-    riskLevel = "Tinggi";
-    priority = "P2 - Patroli Terpadu";
+    riskLevel = "High";
+    priority = "P2 - Coordinated Patrol";
     directive =
-      "POTENSI ESKALASI SEDANG-TINGGI: Lakukan ground-checking drone thermal dan pembasahan preventif di perimeter batas kebun masyarakat.";
+      "MODERATE-HIGH ESCALATION POTENTIAL: Conduct thermal drone ground checks and wetting along agricultural perimeter boundaries.";
   } else if (riskScore >= 30) {
-    riskLevel = "Sedang";
-    priority = "P2 - Patroli Terpadu";
+    riskLevel = "Moderate";
+    priority = "P2 - Coordinated Patrol";
     directive =
-      "SIAGA NORMAL: Kondisi kelembapan menurun bertahap. Siagakan posko MPA (Masyarakat Peduli Api) setempat.";
+      "ELEVATED VIGILANCE: Moisture levels declining. Put local community fire brigades on alert.";
   }
 
   // 5. Feature Importances (Shapley-style attributions)
   const featureNames = [
-    "Daya Radiasi Satelit (FRP)",
-    "Suhu Termal Permukaan (TI4)",
-    "Temperatur Udara Ambien",
-    "Defisit Kelembapan Relatif",
-    "Kecepatan Vektor Angin",
-    "Kekurangan Curah Hujan",
-    "Ketebalan Lapisan Gambut (KHG)",
-    "Kadar Lengas Bahan Bakar",
+    "Satellite Radiative Power (FRP)",
+    "Thermal Brightness Temp (TI4)",
+    "Ambient Air Temperature",
+    "Relative Humidity Deficit",
+    "Wind Vector Velocity",
+    "Precipitation Deficit",
+    "Peat Soil Depth (KHG)",
+    "Fuel Moisture Content",
   ];
 
   const featureImpacts = [

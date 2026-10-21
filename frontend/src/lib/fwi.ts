@@ -69,22 +69,22 @@ export function calculateFWI(weather: WeatherData, hotspotCount: number = 0): FW
 
   const finalScore = Math.min(100, Math.max(10, compositeScore));
 
-  let level: FWIResult['level'] = 'Rendah';
+  let level: FWIResult['level'] = 'Low';
   if (finalScore >= 80) {
-    level = 'Sangat Tinggi';
+    level = 'Very High';
   } else if (finalScore >= 65) {
-    level = 'Tinggi';
+    level = 'High';
   } else if (finalScore >= 45) {
-    level = 'Sedang';
+    level = 'Moderate';
   }
 
-  let summary = 'Kondisi kelembapan cukup aman. Risiko kebakaran rendah.';
-  if (level === 'Sangat Tinggi') {
-    summary = 'Kombinasi cuaca sangat kering, angin kencang, dan indikasi hotspot aktif pada lahan gambut. Sangat disarankan siaga darurat.';
-  } else if (level === 'Tinggi') {
-    summary = 'Terdapat indikasi kuat potensi eskalasi api pada lahan gambut kering. Disarankan patroli terpadu dan pembasahan lahan.';
-  } else if (level === 'Sedang') {
-    summary = 'Kondisi cuaca memerlukan pemantauan berkala. Tim respons lapangan diimbau bersiap siaga.';
+  let summary = 'Moisture levels are stable. Peatland fire risk is low.';
+  if (level === 'Very High') {
+    summary = 'Extreme dryness, high winds, and dense satellite thermal anomalies on peatland. Immediate emergency readiness required.';
+  } else if (level === 'High') {
+    summary = 'Strong potential for rapid fire escalation across dried peat layers. Coordinated patrol and perimeter dousing recommended.';
+  } else if (level === 'Moderate') {
+    summary = 'Weather conditions require routine monitoring. Local community fire brigades (MPA) advised to stand by.';
   }
 
   return {

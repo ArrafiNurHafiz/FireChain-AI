@@ -24,10 +24,10 @@ export function AppLayout({ children }: AppLayoutProps) {
   const navItems = [
     { label: "Dashboard", href: "/", icon: LayoutDashboard },
     { label: "Live Map", href: "/map", icon: MapIcon },
-    { label: "Analisis Risiko (FWI)", href: "/risk", icon: LineChart },
-    { label: "Laporan Kejadian", href: "/reports", icon: FileText },
-    { label: "Audit Trail Blockchain", href: "/audit", icon: Link2 },
-    { label: "Emisi Karbon (IPCC)", href: "/emissions", icon: Leaf },
+    { label: "Risk Analysis (FWI)", href: "/risk", icon: LineChart },
+    { label: "Incident Reports", href: "/reports", icon: FileText },
+    { label: "Blockchain Audit Trail", href: "/audit", icon: Link2 },
+    { label: "Carbon Accounting (IPCC)", href: "/emissions", icon: Leaf },
   ];
 
   return (
@@ -114,7 +114,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           <div className="hidden lg:flex items-center gap-2 text-xs text-muted-foreground">
             <Radio className="h-3.5 w-3.5 text-primary animate-pulse" />
-            <span>Zona Pantauan: <b>Kalimantan (Wilayah Gambut & Hutan Lindung)</b></span>
+            <span>Surveillance Zone: <b>Kalimantan Peatlands & Protected Forests</b></span>
           </div>
 
           {/* Mobile Nav Links */}
@@ -134,14 +134,14 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-xs text-muted-foreground">
-              <span>Waktu Operasional:</span>
+              <span>Operational Date:</span>
               <b className="font-mono text-foreground">
-                {new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                {new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}
               </b>
             </div>
             <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs">
               <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-              <span className="font-medium text-foreground">Operator Posko</span>
+              <span className="font-medium text-foreground">Command Operator</span>
             </div>
           </div>
         </header>

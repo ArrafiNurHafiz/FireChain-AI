@@ -366,7 +366,7 @@ export function LiveMap({
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Semua ({hotspots.length})
+            All ({hotspots.length})
           </button>
           <button
             type="button"
@@ -378,7 +378,7 @@ export function LiveMap({
             }`}
           >
             <Flame className="h-3 w-3" />
-            Kritis (&gt;20 MW)
+            Critical (&gt;20 MW)
           </button>
         </div>
       </div>
@@ -388,7 +388,7 @@ export function LiveMap({
         <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-2">
           {/* Base Layer Switcher */}
           <div className="rounded-lg border border-border/80 bg-background/95 p-2 text-xs shadow-lg backdrop-blur-md">
-            <p className="mb-1 font-semibold text-foreground text-[11px]">Tampilan Peta</p>
+            <p className="mb-1 font-semibold text-foreground text-[11px]">Base Layer</p>
             <div className="flex gap-1">
               <button
                 type="button"
@@ -399,7 +399,7 @@ export function LiveMap({
                     : "bg-muted text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Satelit (ESRI)
+                Satellite (ESRI)
               </button>
               <button
                 type="button"
@@ -410,14 +410,14 @@ export function LiveMap({
                     : "bg-muted text-muted-foreground hover:text-foreground"
                 }`}
               >
-                OSM
+                OSM Streets
               </button>
             </div>
           </div>
 
           {/* Overlays */}
           <div className="rounded-lg border border-border/80 bg-background/95 p-2.5 text-xs shadow-lg backdrop-blur-md">
-            <p className="mb-1.5 font-semibold text-foreground text-[11px]">Layer & Performa</p>
+            <p className="mb-1.5 font-semibold text-foreground text-[11px]">Layers & Overlays</p>
             <div className="space-y-1">
               <label className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground text-[11px]">
                 <input
@@ -426,16 +426,16 @@ export function LiveMap({
                   onChange={(e) => setShowHotspots(e.target.checked)}
                   className="rounded border-border accent-primary"
                 />
-                <span className="font-medium text-foreground">Titik Panas FIRMS</span>
+                <span className="font-medium text-foreground">FIRMS Hotspots</span>
               </label>
               <label className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground text-[11px]">
                 <input
                   type="checkbox"
                   checked={showPeatlands}
                   onChange={(e) => setShowPeatlands(e.target.checked)}
-                  className="rounded border-border accent-accent"
+                  className="rounded border-border accent-primary"
                 />
-                <span className="font-medium text-foreground">Kawasan Gambut</span>
+                <span className="font-medium text-foreground">Peatland Zones (KHG)</span>
               </label>
               <label className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground text-[11px]">
                 <input
@@ -444,26 +444,26 @@ export function LiveMap({
                   onChange={(e) => setShowRadarPulse(e.target.checked)}
                   className="rounded border-border accent-primary"
                 />
-                <span className="font-medium text-foreground">Efek Pulsa Top 5</span>
+                <span className="font-medium text-foreground">Top 5 Pulse Radar</span>
               </label>
             </div>
           </div>
 
           {/* FRP Intensity Legend */}
           <div className="rounded-lg border border-border/80 bg-background/95 p-2.5 text-xs shadow-lg backdrop-blur-md">
-            <p className="mb-1 font-semibold text-foreground text-[11px]">Intensitas FRP</p>
+            <p className="mb-1 font-semibold text-foreground text-[11px]">FRP Intensity</p>
             <div className="space-y-1 text-[11px]">
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-red-500 border border-white" />
-                <span className="font-medium text-foreground">Kritis (&gt; 20 MW)</span>
+                <span className="font-medium text-foreground">Critical (&gt; 20 MW)</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-orange-500 border border-white" />
-                <span className="text-muted-foreground">Sedang (10 - 20 MW)</span>
+                <span className="text-muted-foreground">Moderate (10 - 20 MW)</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 border border-white" />
-                <span className="text-muted-foreground">Rendah (&lt; 10 MW)</span>
+                <span className="text-muted-foreground">Low (&lt; 10 MW)</span>
               </div>
             </div>
           </div>
@@ -476,37 +476,37 @@ export function LiveMap({
           onClick={recenterKalimantan}
           className="rounded px-2 py-0.5 font-semibold text-foreground transition hover:bg-muted text-[11px]"
         >
-          Semua Kalimantan
+          All Kalimantan
         </button>
         <button
           onClick={() => zoomToProvince(-2.21, 113.92)}
           className="rounded px-1.5 py-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium text-[11px]"
         >
-          KalTeng
+          Central Kal
         </button>
         <button
           onClick={() => zoomToProvince(-0.02, 109.34)}
           className="rounded px-1.5 py-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium text-[11px]"
         >
-          KalBar
+          West Kal
         </button>
         <button
           onClick={() => zoomToProvince(-3.32, 114.59)}
           className="rounded px-1.5 py-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium text-[11px]"
         >
-          KalSel
+          South Kal
         </button>
         <button
           onClick={() => zoomToProvince(-0.50, 117.15)}
           className="rounded px-1.5 py-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium text-[11px]"
         >
-          KalTim
+          East Kal
         </button>
         <button
           onClick={() => zoomToProvince(2.84, 117.37)}
           className="rounded px-1.5 py-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium text-[11px]"
         >
-          KalTara
+          North Kal
         </button>
       </div>
     </div>

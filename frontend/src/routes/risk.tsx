@@ -21,8 +21,8 @@ import { WeatherData, FWIResult } from "../lib/types";
 export const Route = createFileRoute("/risk")({
   head: () => ({
     meta: [
-      { title: "Analisis Risiko Kebakaran FWI — FireChain AI" },
-      { name: "description", content: "Kalkulasi Canadian Forest Fire Weather Index (FWI) & cuaca real-time di seluruh provinsi Kalimantan." },
+      { title: "Peatland Fire Risk Analysis (FWI) — FireChain AI" },
+      { name: "description", content: "Canadian Forest Fire Weather Index (FWI) & real-time weather analytics across Kalimantan provinces." },
     ],
   }),
   component: RiskPage,
@@ -101,10 +101,10 @@ function RiskPage() {
               <span className="text-xs text-muted-foreground">Canadian Forest Fire Weather Index (FWI)</span>
             </div>
             <h2 className="text-xl font-bold tracking-tight text-foreground">
-              Analisis Risiko Multi-Provinsi Kalimantan
+              Multi-Province Peatland Fire Risk Analysis
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Parameter cuaca live Open-Meteo dipadukan formula FFMC, ISI, dan beban bahan bakar gambut.
+              Live Open-Meteo weather parameters coupled with FFMC, ISI, and tropical peat fuel load calculations.
             </p>
           </div>
           <button
@@ -113,7 +113,7 @@ function RiskPage() {
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted transition disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} />
-            Perbarui Parameter
+            Refresh Weather Data
           </button>
         </div>
 
@@ -133,7 +133,7 @@ function RiskPage() {
                   <div>
                     <h3 className="font-bold text-foreground text-sm">{prov}</h3>
                     <p className="text-xs text-muted-foreground">
-                      Stasiun: {w?.city || "Mengambil data..."}
+                      Station: {w?.city || "Fetching live data..."}
                     </p>
                   </div>
                   {fwi && (
@@ -152,15 +152,15 @@ function RiskPage() {
                           {fwi.risk_score}
                         </span>
                         <span className="text-xs text-muted-foreground ml-1">/ 100</span>
-                        <p className="text-[11px] text-muted-foreground font-medium">Skor Indeks Risiko</p>
+                        <p className="text-[11px] text-muted-foreground font-medium">Risk Index Score</p>
                       </div>
                       <div className="text-right text-xs space-y-0.5">
                         <div className="flex items-center justify-end gap-1.5 text-foreground font-mono font-bold">
                           <CloudSun className="h-4 w-4 text-yellow-500" />
                           <span>{w.temp}°C</span>
                         </div>
-                        <p className="text-muted-foreground text-[11px]">Kelembapan: {w.humidity}%</p>
-                        <p className="text-muted-foreground text-[11px]">Angin: {w.wind_speed} km/j</p>
+                        <p className="text-muted-foreground text-[11px]">Humidity: {w.humidity}%</p>
+                        <p className="text-muted-foreground text-[11px]">Wind: {w.wind_speed} km/h</p>
                       </div>
                     </div>
 
@@ -188,9 +188,9 @@ function RiskPage() {
                     {/* Hotspot count in province */}
                     <div className="flex items-center justify-between text-xs border-t border-border/60 pt-2 text-muted-foreground">
                       <span className="flex items-center gap-1.5">
-                        <Flame className="h-3.5 w-3.5 text-red-500" /> Hotspot Aktif Terdeteksi:
+                        <Flame className="h-3.5 w-3.5 text-red-500" /> Active Hotspots Detected:
                       </span>
-                      <b className="font-mono text-foreground font-bold">{hsCount.toLocaleString()} titik</b>
+                      <b className="font-mono text-foreground font-bold">{hsCount.toLocaleString()} spots</b>
                     </div>
 
                     <p className="rounded-lg bg-muted/30 p-2 text-[11px] text-muted-foreground leading-relaxed">
@@ -198,7 +198,7 @@ function RiskPage() {
                     </p>
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground py-4 text-center">Memuat kalkulasi FWI...</p>
+                  <p className="text-xs text-muted-foreground py-4 text-center">Calculating FWI parameters...</p>
                 )}
               </div>
             );
@@ -212,10 +212,10 @@ function RiskPage() {
               <span className="h-3 w-3 rounded-full bg-primary animate-pulse" />
               <div>
                 <h3 className="font-bold text-sm text-foreground">
-                  Simulator AI Neural Network (FireChain PeatNet v2.4)
+                  AI Neural Network Simulator (FireChain PeatNet v2.4)
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  Simulasi interaktif inferensi MLP multi-variat: prediksi probabilitas api bawah tanah (smoldering) & laju rambat perimeter per jam.
+                  Interactive multi-variate MLP inference: predicts subterranean smoldering probability & perimeter spread rate per hour.
                 </p>
               </div>
             </div>
@@ -234,7 +234,7 @@ function RiskPage() {
             <div className="space-y-4 text-xs">
               <div>
                 <div className="flex justify-between mb-1.5 font-medium">
-                  <span className="text-foreground">Daya Radiasi Satelit NASA (FRP):</span>
+                  <span className="text-foreground">NASA Satellite Radiative Power (FRP):</span>
                   <span className="font-mono font-bold text-primary">{simFrp} MW</span>
                 </div>
                 <input
@@ -250,7 +250,7 @@ function RiskPage() {
 
               <div>
                 <div className="flex justify-between mb-1.5 font-medium">
-                  <span className="text-foreground">Temperatur Udara Ambien:</span>
+                  <span className="text-foreground">Ambient Air Temperature:</span>
                   <span className="font-mono font-bold text-yellow-500">{simTemp} °C</span>
                 </div>
                 <input
@@ -266,7 +266,7 @@ function RiskPage() {
 
               <div>
                 <div className="flex justify-between mb-1.5 font-medium">
-                  <span className="text-foreground">Kelembapan Relatif (RH):</span>
+                  <span className="text-foreground">Relative Humidity (RH):</span>
                   <span className="font-mono font-bold text-blue-400">{simHumidity} %</span>
                 </div>
                 <input
@@ -282,8 +282,8 @@ function RiskPage() {
 
               <div>
                 <div className="flex justify-between mb-1.5 font-medium">
-                  <span className="text-foreground">Kecepatan Angin 10m:</span>
-                  <span className="font-mono font-bold text-foreground">{simWind} km/j</span>
+                  <span className="text-foreground">10m Wind Speed:</span>
+                  <span className="font-mono font-bold text-foreground">{simWind} km/h</span>
                 </div>
                 <input
                   type="range"
@@ -298,7 +298,7 @@ function RiskPage() {
 
               <div>
                 <div className="flex justify-between mb-1.5 font-medium">
-                  <span className="text-foreground">Ketebalan Lahan Gambut (KHG):</span>
+                  <span className="text-foreground">Peatland Layer Depth (KHG):</span>
                   <span className="font-mono font-bold text-amber-500">{simPeatDepth} cm</span>
                 </div>
                 <input
@@ -318,16 +318,16 @@ function RiskPage() {
               <div className="rounded-xl border border-border/70 bg-muted/20 p-4 space-y-4">
                 <div className="grid grid-cols-2 gap-3 text-center">
                   <div className="rounded-lg bg-card p-3 border border-border/60">
-                    <p className="text-[11px] text-muted-foreground">Probabilitas Smoldering (Api Bawah Tanah)</p>
+                    <p className="text-[11px] text-muted-foreground">Smoldering Probability (Subterranean)</p>
                     <p className="text-2xl font-extrabold font-mono text-red-500 mt-0.5">
                       {aiPred.smoldering_probability_pct}%
                     </p>
                     <span className="text-[10px] text-muted-foreground">Sigmoid Activation</span>
                   </div>
                   <div className="rounded-lg bg-card p-3 border border-border/60">
-                    <p className="text-[11px] text-muted-foreground">Proyeksi Laju Rambat Perimeter</p>
+                    <p className="text-[11px] text-muted-foreground">Projected Perimeter Spread Rate</p>
                     <p className="text-2xl font-extrabold font-mono text-orange-500 mt-0.5">
-                      {aiPred.spread_rate_m_hr} <span className="text-xs font-normal">m/jam</span>
+                      {aiPred.spread_rate_m_hr} <span className="text-xs font-normal">m/h</span>
                     </p>
                     <span className="text-[10px] text-muted-foreground">Elliptical Wind Vector</span>
                   </div>
@@ -346,7 +346,7 @@ function RiskPage() {
                 <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-xs space-y-1">
                   <span className="font-bold text-primary text-[11px] uppercase tracking-wide flex items-center gap-1.5">
                     <AlertTriangle className="h-3.5 w-3.5" />
-                    Instruksi Taktis AI ({aiPred.suppression_priority})
+                    AI Tactical Directive ({aiPred.suppression_priority})
                   </span>
                   <p className="text-foreground text-[11px] leading-relaxed">
                     {aiPred.tactical_directive}
@@ -361,29 +361,29 @@ function RiskPage() {
         <section className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-3">
           <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
             <Gauge className="h-4 w-4 text-primary" />
-            Metodologi Canadian Forest Fire Weather Index (FWI) untuk Ekosistem Gambut
+            Canadian Forest Fire Weather Index (FWI) Methodology for Peatland Ecosystems
           </h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Algoritma FWI merupakan standar global pemodelan risiko bahaya kebakaran hutan dan lahan. 
-            Dalam FireChain AI, model ini disesuaikan khusus dengan karakteristik lahan gambut tropis (tropical peatland):
+            The FWI algorithm is the international benchmark for fire hazard modeling. 
+            In FireChain AI, it is adapted specifically for tropical peatland hydrology:
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs pt-2">
             <div className="rounded-lg border border-border/60 bg-muted/20 p-3 space-y-1">
               <p className="font-bold text-foreground">1. Fine Fuel Moisture Code (FFMC)</p>
               <p className="text-muted-foreground text-[11px] leading-relaxed">
-                Mengukur tingkat kekeringan serasah dan lapisan lumut permukaan gambut. Nilai &gt; 85 mengindikasikan bahan bakar sangat mudah tersulut percikan api kecil.
+                Measures dryness of top litter and moss layers on peat surfaces. Values &gt; 85 indicate fuels ignite readily from small sparks.
               </p>
             </div>
             <div className="rounded-lg border border-border/60 bg-muted/20 p-3 space-y-1">
               <p className="font-bold text-foreground">2. Initial Spread Index (ISI)</p>
               <p className="text-muted-foreground text-[11px] leading-relaxed">
-                Menggabungkan kadar lengas bahan bakar dan kecepatan angin 10 meter untuk memproyeksikan laju percepatan rambatan api di permukaan kanopi.
+                Combines fuel moisture and 10-meter open wind speed to project the rate of forward fire perimeter propagation.
               </p>
             </div>
             <div className="rounded-lg border border-border/60 bg-muted/20 p-3 space-y-1">
               <p className="font-bold text-foreground">3. Peatland Vulnerability Weighting</p>
               <p className="text-muted-foreground text-[11px] leading-relaxed">
-                Menimbang keberadaan kesatuan hidrologis gambut (KHG). Kebakaran gambut memiliki risiko api bawah tanah (smoldering) yang memancarkan gas rumah kaca berkali-kali lipat.
+                Weights peat depth and canal drainage status. Underground smoldering fires release dense greenhouse gas emissions that persist for weeks.
               </p>
             </div>
           </div>

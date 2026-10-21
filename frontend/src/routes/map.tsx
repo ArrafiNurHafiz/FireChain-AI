@@ -19,8 +19,8 @@ import { Hotspot } from "../lib/types";
 export const Route = createFileRoute("/map")({
   head: () => ({
     meta: [
-      { title: "Live Map Hotspot Kalimantan — FireChain AI" },
-      { name: "description", content: "Peta interaktif sebaran titik panas satelit NASA FIRMS dan kawasan gambut Kalimantan." },
+      { title: "Live Hotspot Map Kalimantan — FireChain AI" },
+      { name: "description", content: "Interactive map of NASA FIRMS satellite thermal anomalies and Kalimantan peatland hydrological units." },
     ],
   }),
   component: MapPage,
@@ -54,7 +54,7 @@ function MapPage() {
               <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Cari ID hotspot atau provinsi..."
+                placeholder="Search hotspot ID or province..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full rounded-lg border border-border bg-background pl-8 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
@@ -66,12 +66,12 @@ function MapPage() {
               onChange={(e) => setProvince(e.target.value)}
               className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             >
-              <option value="Semua">Semua Wilayah</option>
-              <option value="Kalimantan Tengah">Kalimantan Tengah</option>
-              <option value="Kalimantan Barat">Kalimantan Barat</option>
-              <option value="Kalimantan Selatan">Kalimantan Selatan</option>
-              <option value="Kalimantan Timur">Kalimantan Timur</option>
-              <option value="Kalimantan Utara">Kalimantan Utara</option>
+              <option value="Semua">All Provinces</option>
+              <option value="Kalimantan Tengah">Central Kalimantan</option>
+              <option value="Kalimantan Barat">West Kalimantan</option>
+              <option value="Kalimantan Selatan">South Kalimantan</option>
+              <option value="Kalimantan Timur">East Kalimantan</option>
+              <option value="Kalimantan Utara">North Kalimantan</option>
             </select>
 
             <select
@@ -79,8 +79,8 @@ function MapPage() {
               onChange={(e) => setConfidence(e.target.value as any)}
               className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             >
-              <option value="all">Semua Keyakinan</option>
-              <option value="high">Hanya High Confidence</option>
+              <option value="all">All Confidence</option>
+              <option value="high">High Confidence Only</option>
               <option value="nominal">Nominal & High</option>
             </select>
 
@@ -100,7 +100,7 @@ function MapPage() {
 
           <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0 font-mono">
             <span>
-              Ditampilkan: <b className="text-foreground">{filtered.length.toLocaleString()}</b> / {allHotspots.length.toLocaleString()}
+              Displaying: <b className="text-foreground">{filtered.length.toLocaleString()}</b> / {allHotspots.length.toLocaleString()}
             </span>
           </div>
         </div>
@@ -122,7 +122,7 @@ function MapPage() {
               <div className="flex items-center justify-between border-b border-border/60 pb-3">
                 <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
                   <Compass className="h-4 w-4 text-primary" />
-                  Inspektor Titik Panas
+                  Hotspot Inspector
                 </h3>
                 {selectedHotspot && (
                   <button
@@ -143,7 +143,7 @@ function MapPage() {
 
                   <div className="space-y-2 border-t border-border/40 pt-2">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Koordinat:</span>
+                      <span className="text-muted-foreground">Coordinates:</span>
                       <span className="font-mono font-bold text-foreground">
                         {selectedHotspot.latitude.toFixed(4)}, {selectedHotspot.longitude.toFixed(4)}
                       </span>
@@ -155,28 +155,28 @@ function MapPage() {
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Suhu Termal (TI4):</span>
+                      <span className="text-muted-foreground">Brightness Temp (TI4):</span>
                       <span className="font-mono font-bold text-foreground">
                         {selectedHotspot.bright_ti4} K ({(selectedHotspot.bright_ti4 - 273.15).toFixed(1)} °C)
                       </span>
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Tingkat Keyakinan:</span>
+                      <span className="text-muted-foreground">Confidence Level:</span>
                       <span className="font-semibold uppercase text-primary font-mono">
                         {selectedHotspot.confidence}
                       </span>
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Waktu Akusisi:</span>
+                      <span className="text-muted-foreground">Acquisition Time:</span>
                       <span className="font-mono text-foreground">
                         {selectedHotspot.acq_date} {selectedHotspot.acq_time} UTC
                       </span>
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Instrumen Sensor:</span>
+                      <span className="text-muted-foreground">Sensor Instrument:</span>
                       <span className="text-foreground">Suomi-NPP VIIRS (NASA)</span>
                     </div>
                   </div>
@@ -210,8 +210,8 @@ function MapPage() {
                             <p className="font-mono font-bold text-red-400">{aiEval.smoldering_probability_pct}%</p>
                           </div>
                           <div>
-                            <span className="text-muted-foreground">Laju Rambat:</span>
-                            <p className="font-mono font-bold text-orange-400">{aiEval.spread_rate_m_hr} m/jam</p>
+                            <span className="text-muted-foreground">Spread Velocity:</span>
+                            <p className="font-mono font-bold text-orange-400">{aiEval.spread_rate_m_hr} m/h</p>
                           </div>
                         </div>
                         <p className="text-[10px] text-muted-foreground leading-tight pt-0.5">
@@ -227,16 +227,16 @@ function MapPage() {
                       className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition"
                     >
                       <Flame className="h-3.5 w-3.5" />
-                      Terbitkan Laporan Lapangan
+                      File Incident Report
                     </a>
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-8 text-xs text-muted-foreground space-y-2">
                   <Info className="h-8 w-8 mx-auto text-muted-foreground/50" />
-                  <p className="font-medium">Pilih titik hotspot pada peta</p>
+                  <p className="font-medium">Select a hotspot on the map</p>
                   <p className="text-[11px] leading-relaxed">
-                    Klik marker titik api merah/oranye untuk melihat telemetri satelit, FRP, dan koordinat detail.
+                    Click any red/orange marker on the map to inspect satellite telemetry, FRP, and exact coordinates.
                   </p>
                 </div>
               )}
@@ -244,13 +244,13 @@ function MapPage() {
 
             {/* Quick Stats Summary */}
             <div className="border-t border-border/60 pt-3 text-xs space-y-2">
-              <p className="font-semibold text-foreground text-[11px]">Ringkasan Filter Terpilih</p>
+              <p className="font-semibold text-foreground text-[11px]">Filtered Hotspots Summary</p>
               <div className="flex justify-between text-[11px] text-muted-foreground">
-                <span>Rata-rata FRP:</span>
+                <span>Average FRP:</span>
                 <span className="font-mono font-bold text-foreground">{stats.avgFrp} MW</span>
               </div>
               <div className="flex justify-between text-[11px] text-muted-foreground">
-                <span>Hotspot High Confidence:</span>
+                <span>High Confidence Hotspots:</span>
                 <span className="font-mono font-bold text-red-500">{stats.highConfidence}</span>
               </div>
             </div>

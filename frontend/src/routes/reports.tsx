@@ -27,8 +27,8 @@ import { IncidentReport, ReportStatus, SeverityLevel } from "../lib/types";
 export const Route = createFileRoute("/reports")({
   head: () => ({
     meta: [
-      { title: "Manajemen Laporan Kejadian — FireChain AI" },
-      { name: "description", content: "Pencatatan dan verifikasi laporan kebakaran hutan dan lahan gambut Kalimantan." },
+      { title: "Field Incident Reports — FireChain AI" },
+      { name: "description", content: "Logging, tracking, and cryptographic verification of Kalimantan peatland fire reports." },
     ],
   }),
   component: ReportsPage,
@@ -36,8 +36,8 @@ export const Route = createFileRoute("/reports")({
 
 function ReportsPage() {
   const [reports, setReports] = useState<IncidentReport[]>(getIncidentReports);
-  const [filterStatus, setFilterStatus] = useState<string>("Semua");
-  const [filterProv, setFilterProv] = useState<string>("Semua");
+  const [filterStatus, setFilterStatus] = useState<string>("All");
+  const [filterProv, setFilterProv] = useState<string>("All");
   const [search, setSearch] = useState<string>("");
 
   // Modal State
@@ -46,14 +46,14 @@ function ReportsPage() {
 
   // Form State
   const [formTitle, setFormTitle] = useState("");
-  const [formProv, setFormProv] = useState("Kalimantan Tengah");
+  const [formProv, setFormProv] = useState("Central Kalimantan");
   const [formLoc, setFormLoc] = useState("");
   const [formLat, setFormLat] = useState<string>("-2.2100");
   const [formLon, setFormLon] = useState<string>("113.9200");
-  const [formSeverity, setFormSeverity] = useState<SeverityLevel>("Tinggi");
+  const [formSeverity, setFormSeverity] = useState<SeverityLevel>("High");
   const [formDesc, setFormDesc] = useState("");
   const [formName, setFormName] = useState("");
-  const [formOrg, setFormOrg] = useState("Manggala Agni / Relawan MPA");
+  const [formOrg, setFormOrg] = useState("Manggala Agni / MPA Fire Brigade");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [gpsLoading, setGpsLoading] = useState(false);
 
@@ -65,7 +65,7 @@ function ReportsPage() {
 
   const handleGetLocation = () => {
     if (typeof window === "undefined" || !navigator.geolocation) {
-      setFormFeedback({ type: "error", message: "Geolokasi tidak didukung oleh peramban ini." });
+      setFormFeedback({ type: "error", message: "Geolocation is not supported by this browser." });
       return;
     }
     setGpsLoading(true);
@@ -76,7 +76,7 @@ function ReportsPage() {
         setGpsLoading(false);
       },
       (err) => {
-        setFormFeedback({ type: "error", message: "Gagal membaca GPS: " + err.message });
+        setFormFeedback({ type: "error", message: "Failed to acquire GPS: " + err.message });
         setGpsLoading(false);
       },
       { timeout: 10000 }
@@ -86,7 +86,7 @@ function ReportsPage() {
   const handleCreateReport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle || !formLoc || !formDesc || !formName) {
-      setFormFeedback({ type: "error", message: "Harap lengkapi semua kolom bertanda wajib." });
+      setFormFeedback({ type: "error", message: "Please fill in all required fields." });
       return;
     }
 
@@ -113,11 +113,11 @@ function ReportsPage() {
       setFormName("");
       setFormFeedback({
         type: "success",
-        message: `Laporan ${created.id} berhasil diterbitkan dan dicatat dalam blok kriptografis.`,
+        message: `Report ${created.id} successfully published and anchored to the cryptographic ledger.`,
       });
     } catch (err) {
       console.error(err);
-      setFormFeedback({ type: "error", message: "Gagal menyimpan laporan." });
+      setFormFeedback({ type: "error", message: "Failed to save incident report." });
     } finally {
       setIsSubmitting(false);
     }
@@ -134,7 +134,7 @@ function ReportsPage() {
   };
 
   const exportCSV = () => {
-    const headers = ["ID", "Judul", "Provinsi", "Lokasi", "Latitude", "Longitude", "Keparahan", "Status", "Pelapor", "Organisasi", "Waktu", "Hash Blok"];
+    const headers = ["ID", "Title", "Province", "Location", "Latitude", "Longitude", "Severity", "Status", "Reporter", "Organization", "Timestamp", "Block Hash"];
     const rows = reports.map((r) => [
       r.id,
       `"${r.title.replace(/"/g, '""')}"`,
@@ -161,8 +161,8 @@ function ReportsPage() {
   };
 
   const filtered = reports.filter((r) => {
-    if (filterStatus !== "Semua" && r.status !== filterStatus) return false;
-    if (filterProv !== "Semua" && r.province !== filterProv) return false;
+    if (filterStatus !== "All" && r.status !== filterStatus) return false;
+    if (filterProv !== "All" && r.province !== filterProv) return false;
     if (search) {
       const q = search.toLowerCase();
       const matchId = r.id.toLowerCase().includes(q);
@@ -174,6 +174,12 @@ function ReportsPage() {
   });
 
   const badgeColor: Record<string, string> = {
+    Critical: "bg-red-500/20 text-red-500 border-red-500/30",
+    "Very High": "bg-red-500/20 text-red-500 border-red-500/30",
+    High: "bg-orange-500/20 text-orange-500 border-orange-500/30",
+    Moderate: "bg-yellow-500/20 text-yellow-500 border-yellow-500/30",
+    Low: "bg-emerald-500/20 text-emerald-500 border-emerald-500/30",
+    // Fallback for legacy ID strings
     "Sangat Tinggi": "bg-red-500/20 text-red-500 border-red-500/30",
     Tinggi: "bg-orange-500/20 text-orange-500 border-orange-500/30",
     Sedang: "bg-yellow-500/20 text-yellow-500 border-yellow-500/30",
@@ -181,6 +187,12 @@ function ReportsPage() {
   };
 
   const statusBadgeColor: Record<string, string> = {
+    "Draft Created": "bg-muted text-muted-foreground",
+    "Under Verification": "bg-yellow-500/20 text-yellow-500",
+    Verified: "bg-blue-500/20 text-blue-400",
+    "Response Active": "bg-orange-500/20 text-orange-500 font-semibold",
+    Resolved: "bg-emerald-500/20 text-emerald-500 font-semibold",
+    // Fallback for legacy ID strings
     "Laporan Dibuat": "bg-muted text-muted-foreground",
     "Dalam Verifikasi": "bg-yellow-500/20 text-yellow-500",
     Terverifikasi: "bg-blue-500/20 text-blue-400",
@@ -195,10 +207,10 @@ function ReportsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-sm">
           <div>
             <h2 className="text-xl font-bold tracking-tight text-foreground">
-              Manajemen Laporan Kejadian Lapangan
+              Field Incident Management & On-Chain Registry
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Setiap laporan dan pergantian status dicatat permanen dalam audit trail blockchain terdesentralisasi.
+              Each field report and status update is permanently anchored to the decentralized blockchain audit trail.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -207,7 +219,7 @@ function ReportsPage() {
               className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted transition"
             >
               <Download className="h-3.5 w-3.5" />
-              Ekspor CSV
+              Export CSV
             </button>
             <button
               id="btn-open-create-report"
@@ -218,7 +230,7 @@ function ReportsPage() {
               className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow hover:bg-primary/90 transition"
             >
               <Plus className="h-3.5 w-3.5" />
-              Lapor Titik Api Baru
+              Report New Fire Incident
             </button>
           </div>
         </div>
@@ -248,7 +260,7 @@ function ReportsPage() {
               <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Cari ID laporan, judul, atau desa..."
+                placeholder="Search report ID, title, or village..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full rounded-lg border border-border bg-background pl-8 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
@@ -260,12 +272,12 @@ function ReportsPage() {
               onChange={(e) => setFilterStatus(e.target.value)}
               className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             >
-              <option value="Semua">Semua Status</option>
-              <option value="Laporan Dibuat">Laporan Dibuat</option>
-              <option value="Dalam Verifikasi">Dalam Verifikasi</option>
-              <option value="Terverifikasi">Terverifikasi</option>
-              <option value="Respons Berlangsung">Respons Berlangsung</option>
-              <option value="Selesai">Selesai</option>
+              <option value="All">All Statuses</option>
+              <option value="Draft Created">Draft Created</option>
+              <option value="Under Verification">Under Verification</option>
+              <option value="Verified">Verified</option>
+              <option value="Response Active">Response Active</option>
+              <option value="Resolved">Resolved</option>
             </select>
 
             <select
@@ -273,17 +285,17 @@ function ReportsPage() {
               onChange={(e) => setFilterProv(e.target.value)}
               className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             >
-              <option value="Semua">Semua Provinsi</option>
-              <option value="Kalimantan Tengah">Kalimantan Tengah</option>
-              <option value="Kalimantan Barat">Kalimantan Barat</option>
-              <option value="Kalimantan Selatan">Kalimantan Selatan</option>
-              <option value="Kalimantan Timur">Kalimantan Timur</option>
-              <option value="Kalimantan Utara">Kalimantan Utara</option>
+              <option value="All">All Provinces</option>
+              <option value="Kalimantan Tengah">Central Kalimantan</option>
+              <option value="Kalimantan Barat">West Kalimantan</option>
+              <option value="Kalimantan Selatan">South Kalimantan</option>
+              <option value="Kalimantan Timur">East Kalimantan</option>
+              <option value="Kalimantan Utara">North Kalimantan</option>
             </select>
           </div>
 
           <div className="text-xs text-muted-foreground font-mono">
-            Total Laporan: <b className="text-foreground">{filtered.length}</b>
+            Total Reports: <b className="text-foreground">{filtered.length}</b>
           </div>
         </div>
 
@@ -293,13 +305,13 @@ function ReportsPage() {
             <table className="w-full text-left text-xs">
               <thead className="border-b border-border bg-muted/40 font-semibold text-muted-foreground">
                 <tr>
-                  <th className="p-3">ID Laporan</th>
-                  <th className="p-3">Judul & Lokasi</th>
-                  <th className="p-3">Provinsi</th>
-                  <th className="p-3">Keparahan</th>
+                  <th className="p-3">Report ID</th>
+                  <th className="p-3">Title & Location</th>
+                  <th className="p-3">Province</th>
+                  <th className="p-3">Severity</th>
                   <th className="p-3">Status</th>
-                  <th className="p-3">Pelapor</th>
-                  <th className="p-3 text-right">Aksi</th>
+                  <th className="p-3">Reporter</th>
+                  <th className="p-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -340,7 +352,7 @@ function ReportsPage() {
                         onClick={() => setSelectedReport(rep)}
                         className="rounded border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-muted transition"
                       >
-                        Detail & Aksi
+                        Detail & Actions
                       </button>
                     </td>
                   </tr>
@@ -357,7 +369,7 @@ function ReportsPage() {
               <div className="flex items-center justify-between border-b border-border/60 pb-3">
                 <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                   <Flame className="h-5 w-5 text-primary" />
-                  Form Laporan Kebakaran Gambut
+                  Peatland Fire Incident Form
                 </h3>
                 <button onClick={() => setIsCreateOpen(false)} className="text-muted-foreground hover:text-foreground">
                   <X className="h-5 w-5" />
@@ -366,11 +378,11 @@ function ReportsPage() {
 
               <form onSubmit={handleCreateReport} className="space-y-4 text-xs">
                 <div>
-                  <label className="block font-semibold text-foreground mb-1">Judul Kejadian *</label>
+                  <label className="block font-semibold text-foreground mb-1">Incident Title *</label>
                   <input
                     type="text"
                     required
-                    placeholder="Contoh: Titik Api Terdeteksi di Lahan Gambut Katingan"
+                    placeholder="e.g. Subterranean Fire Flare-up in Katingan Peat Reserve"
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
                     className="w-full rounded-lg border border-border bg-background p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
@@ -379,41 +391,42 @@ function ReportsPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-foreground mb-1">Provinsi *</label>
+                    <label className="block font-semibold text-foreground mb-1">Province *</label>
                     <select
                       value={formProv}
                       onChange={(e) => setFormProv(e.target.value)}
                       className="w-full rounded-lg border border-border bg-background p-2 text-foreground focus:outline-none"
                     >
-                      <option value="Kalimantan Tengah">Kalimantan Tengah</option>
-                      <option value="Kalimantan Barat">Kalimantan Barat</option>
-                      <option value="Kalimantan Selatan">Kalimantan Selatan</option>
-                      <option value="Kalimantan Timur">Kalimantan Timur</option>
-                      <option value="Kalimantan Utara">Kalimantan Utara</option>
+                      <option value="Kalimantan Tengah">Central Kalimantan</option>
+                      <option value="Kalimantan Barat">West Kalimantan</option>
+                      <option value="Kalimantan Selatan">South Kalimantan</option>
+                      <option value="Kalimantan Timur">East Kalimantan</option>
+                      <option value="Kalimantan Utara">North Kalimantan</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-foreground mb-1">Tingkat Keparahan *</label>
+                    <label className="block font-semibold text-foreground mb-1">Severity Level *</label>
                     <select
                       value={formSeverity}
                       onChange={(e) => setFormSeverity(e.target.value as SeverityLevel)}
                       className="w-full rounded-lg border border-border bg-background p-2 text-foreground focus:outline-none"
                     >
-                      <option value="Sangat Tinggi">Sangat Tinggi</option>
-                      <option value="Tinggi">Tinggi</option>
-                      <option value="Sedang">Sedang</option>
-                      <option value="Rendah">Rendah</option>
+                      <option value="Critical">Critical</option>
+                      <option value="Very High">Very High</option>
+                      <option value="High">High</option>
+                      <option value="Moderate">Moderate</option>
+                      <option value="Low">Low</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-foreground mb-1">Nama Desa / Kawasan *</label>
+                  <label className="block font-semibold text-foreground mb-1">Village / Landmark Name *</label>
                   <input
                     type="text"
                     required
-                    placeholder="Contoh: Desa Hampalit, Kec. Katingan Hilir"
+                    placeholder="e.g. Hampalit Village, Katingan Hilir District"
                     value={formLoc}
                     onChange={(e) => setFormLoc(e.target.value)}
                     className="w-full rounded-lg border border-border bg-background p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
@@ -423,7 +436,7 @@ function ReportsPage() {
                 {/* GPS Coordinates with auto detect */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="font-semibold text-foreground">Koordinat Geografis (Latitude, Longitude) *</label>
+                    <label className="font-semibold text-foreground">GPS Coordinates (Latitude, Longitude) *</label>
                     <button
                       type="button"
                       onClick={handleGetLocation}
@@ -431,7 +444,7 @@ function ReportsPage() {
                       className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-semibold"
                     >
                       <Crosshair className={`h-3 w-3 ${gpsLoading ? "animate-spin" : ""}`} />
-                      Gunakan GPS Perangkat
+                      Use Device GPS
                     </button>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -455,11 +468,11 @@ function ReportsPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-foreground mb-1">Deskripsi & Kondisi Lapangan *</label>
+                  <label className="block font-semibold text-foreground mb-1">Field Description & Conditions *</label>
                   <textarea
                     required
                     rows={3}
-                    placeholder="Jelaskan kondisi vegetasi, kedalaman gambut, arah asap, atau sarana pemadaman..."
+                    placeholder="Describe vegetation type, peat depth, smoke drift direction, or ongoing suppression efforts..."
                     value={formDesc}
                     onChange={(e) => setFormDesc(e.target.value)}
                     className="w-full rounded-lg border border-border bg-background p-2.5 text-foreground placeholder:text-muted-foreground focus:outline-none"
@@ -468,11 +481,11 @@ function ReportsPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-foreground mb-1">Nama Pelapor *</label>
+                    <label className="block font-semibold text-foreground mb-1">Reporter Name *</label>
                     <input
                       type="text"
                       required
-                      placeholder="Nama Lengkap"
+                      placeholder="Full Name"
                       value={formName}
                       onChange={(e) => setFormName(e.target.value)}
                       className="w-full rounded-lg border border-border bg-background p-2 text-foreground focus:outline-none"
@@ -480,10 +493,10 @@ function ReportsPage() {
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-foreground mb-1">Organisasi / Instansi</label>
+                    <label className="block font-semibold text-foreground mb-1">Organization / Agency</label>
                     <input
                       type="text"
-                      placeholder="Manggala Agni / BPBD / Warga"
+                      placeholder="Manggala Agni / BPBD / Resident"
                       value={formOrg}
                       onChange={(e) => setFormOrg(e.target.value)}
                       className="w-full rounded-lg border border-border bg-background p-2 text-foreground focus:outline-none"
@@ -497,14 +510,14 @@ function ReportsPage() {
                     onClick={() => setIsCreateOpen(false)}
                     className="rounded-lg border border-border px-4 py-2 font-semibold text-foreground hover:bg-muted"
                   >
-                    Batal
+                    Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
                     className="rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                   >
-                    {isSubmitting ? "Menerbitkan ke Blockchain..." : "Terbitkan Laporan"}
+                    {isSubmitting ? "Anchoring to Blockchain..." : "Publish & Anchor to Blockchain"}
                   </button>
                 </div>
               </form>
@@ -528,40 +541,40 @@ function ReportsPage() {
 
               <div className="space-y-3 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Status Saat Ini:</span>
+                  <span className="text-muted-foreground">Current Status:</span>
                   <span className={`rounded px-2.5 py-0.5 font-semibold ${statusBadgeColor[selectedReport.status]}`}>
                     {selectedReport.status}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Tingkat Keparahan:</span>
+                  <span className="text-muted-foreground">Severity Level:</span>
                   <span className={`rounded border px-2 py-0.5 font-semibold ${badgeColor[selectedReport.severity]}`}>
                     {selectedReport.severity}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Lokasi:</span>
+                  <span className="text-muted-foreground">Location:</span>
                   <span className="font-medium text-foreground">
                     {selectedReport.location_name}, {selectedReport.province}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Koordinat:</span>
+                  <span className="text-muted-foreground">Coordinates:</span>
                   <span className="font-mono text-foreground">
                     {selectedReport.latitude}, {selectedReport.longitude}
                   </span>
                 </div>
 
                 <div className="rounded-lg bg-muted/40 p-3 border border-border/50">
-                  <p className="font-semibold text-foreground mb-1">Deskripsi Lapangan:</p>
+                  <p className="font-semibold text-foreground mb-1">Field Description:</p>
                   <p className="text-muted-foreground leading-relaxed">{selectedReport.description}</p>
                 </div>
 
                 <div className="rounded-lg bg-muted/30 p-2.5 border border-border/50">
-                  <p className="text-[10px] text-muted-foreground font-semibold">Bukti Hash Blok Kriptografis:</p>
+                  <p className="text-[10px] text-muted-foreground font-semibold">Cryptographic Block Hash Proof:</p>
                   <p className="font-mono text-[10px] text-foreground truncate mt-0.5">
                     {selectedReport.block_hash || "0x8b2e4c1d7a93f18e0a459cf92106bd2f391a82e614c9c7f66a2c914a4c1de9f2"}
                   </p>
@@ -569,25 +582,25 @@ function ReportsPage() {
 
                 {/* Status Workflow Action Buttons */}
                 <div className="border-t border-border/60 pt-3 space-y-2">
-                  <p className="font-semibold text-foreground text-[11px]">Tindakan Status Lapangan:</p>
+                  <p className="font-semibold text-foreground text-[11px]">Field Status Workflow:</p>
                   <div className="grid grid-cols-3 gap-2">
                     <button
-                      onClick={() => handleStatusChange(selectedReport.id, "Terverifikasi")}
+                      onClick={() => handleStatusChange(selectedReport.id, "Verified")}
                       className="rounded border border-blue-500/40 bg-blue-500/10 py-1.5 text-blue-400 font-semibold hover:bg-blue-500/20"
                     >
-                      Verifikasi Lapangan
+                      Verify Ground
                     </button>
                     <button
-                      onClick={() => handleStatusChange(selectedReport.id, "Respons Berlangsung")}
+                      onClick={() => handleStatusChange(selectedReport.id, "Response Active")}
                       className="rounded border border-orange-500/40 bg-orange-500/10 py-1.5 text-orange-400 font-semibold hover:bg-orange-500/20"
                     >
-                      Tugaskan Tim
+                      Dispatch Taskforce
                     </button>
                     <button
-                      onClick={() => handleStatusChange(selectedReport.id, "Selesai")}
+                      onClick={() => handleStatusChange(selectedReport.id, "Resolved")}
                       className="rounded border border-emerald-500/40 bg-emerald-500/10 py-1.5 text-emerald-400 font-semibold hover:bg-emerald-500/20"
                     >
-                      Tandai Padam
+                      Mark Extinguished
                     </button>
                   </div>
                 </div>

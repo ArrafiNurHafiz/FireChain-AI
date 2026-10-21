@@ -40,7 +40,7 @@ export interface FWIResult {
   ffmc: number; // Fine Fuel Moisture Code (0 - 101)
   isi: number;  // Initial Spread Index
   risk_score: number; // 0 - 100
-  level: 'Rendah' | 'Sedang' | 'Tinggi' | 'Sangat Tinggi' | 'Ekstrem';
+  level: 'Low' | 'Moderate' | 'High' | 'Very High' | 'Extreme';
   factors: {
     satellite_hotspots: number;
     weather_dryness: number;
@@ -51,8 +51,8 @@ export interface FWIResult {
   summary: string;
 }
 
-export type ReportStatus = 'Laporan Dibuat' | 'Dalam Verifikasi' | 'Terverifikasi' | 'Respons Berlangsung' | 'Selesai';
-export type SeverityLevel = 'Rendah' | 'Sedang' | 'Tinggi' | 'Sangat Tinggi';
+export type ReportStatus = 'Draft Created' | 'Under Verification' | 'Verified' | 'Response Active' | 'Resolved';
+export type SeverityLevel = 'Low' | 'Moderate' | 'High' | 'Very High' | 'Critical';
 
 export interface IncidentReport {
   id: string;

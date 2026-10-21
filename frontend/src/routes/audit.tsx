@@ -22,8 +22,8 @@ import { AuditBlock } from "../lib/types";
 export const Route = createFileRoute("/audit")({
   head: () => ({
     meta: [
-      { title: "Audit Trail Blockchain — FireChain AI" },
-      { name: "description", content: "Ledger terdesentralisasi berbasis SHA-256 dan smart contract untuk audit transparansi karhutla." },
+      { title: "Blockchain Audit Trail — FireChain AI" },
+      { name: "description", content: "Decentralized SHA-256 ledger and smart contract for transparent wildfire auditing." },
     ],
   }),
   component: AuditPage,
@@ -82,10 +82,10 @@ function AuditPage() {
               <span className="text-xs text-muted-foreground">Chain ID: 80002 • EVM Public Consensus</span>
             </div>
             <h2 className="text-xl font-bold tracking-tight text-foreground">
-              Audit Trail Kriptografis & On-Chain Consensus
+              Cryptographic Audit Trail & On-Chain Consensus
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Setiap deteksi satelit, laporan lapangan, dan intervensi pemadaman diikat rantai SHA-256 dan di-anchoring langsung ke jaringan Polygon Amoy.
+              Every satellite anomaly, field report, and suppression intervention is cryptographically chained via SHA-256 and anchored to Polygon Amoy.
             </p>
           </div>
 
@@ -105,7 +105,7 @@ function AuditPage() {
               className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-emerald-500 transition disabled:opacity-50"
             >
               <ShieldCheck className={`h-4 w-4 ${verifying ? "animate-spin" : ""}`} />
-              {verifying ? "Menghitung Hash..." : "Verifikasi Integritas Rantai"}
+              {verifying ? "Verifying Hashes..." : "Verify Cryptographic Chain"}
             </button>
           </div>
         </div>
@@ -114,22 +114,22 @@ function AuditPage() {
         {polygonStatus && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="rounded-lg border border-border bg-card p-3 text-xs">
-              <span className="text-muted-foreground text-[11px]">Jaringan On-Chain</span>
+              <span className="text-muted-foreground text-[11px]">On-Chain Network</span>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 <b className="text-foreground">{polygonStatus.networkName}</b>
               </div>
             </div>
             <div className="rounded-lg border border-border bg-card p-3 text-xs">
-              <span className="text-muted-foreground text-[11px]">Blok Terkini (Live RPC)</span>
+              <span className="text-muted-foreground text-[11px]">Latest Block (Live RPC)</span>
               <p className="font-mono font-bold text-foreground text-sm mt-0.5">#{polygonStatus.blockNumber}</p>
             </div>
             <div className="rounded-lg border border-border bg-card p-3 text-xs">
-              <span className="text-muted-foreground text-[11px]">Gas Price Rata-rata</span>
+              <span className="text-muted-foreground text-[11px]">Average Gas Price</span>
               <p className="font-mono font-bold text-foreground text-sm mt-0.5">{polygonStatus.gasPriceGwei} Gwei</p>
             </div>
             <div className="rounded-lg border border-border bg-card p-3 text-xs">
-              <span className="text-muted-foreground text-[11px]">Node Validator Posko</span>
+              <span className="text-muted-foreground text-[11px]">Command Validator Node</span>
               <p className="font-mono text-purple-400 truncate text-[11px] mt-0.5">{polygonStatus.validatorAddress}</p>
             </div>
           </div>
@@ -153,12 +153,12 @@ function AuditPage() {
               <div>
                 <p className="font-bold text-sm">
                   {verifyResult.valid
-                    ? "Integritas Rantai Kriptografis Lulus Verifikasi!"
-                    : "Peringatan: Integritas Rantai Terkompromi!"}
+                    ? "Cryptographic Chain Integrity Verification Passed!"
+                    : "Warning: Cryptographic Chain Integrity Compromised!"}
                 </p>
                 <p className="mt-0.5 opacity-90">
                   {verifyResult.valid
-                    ? `Seluruh ${verifyResult.totalBlocks} blok diverifikasi ulang menggunakan Web Crypto API. Tidak ditemukan anomali atau modifikasi hash.`
+                    ? `All ${verifyResult.totalBlocks} blocks successfully reverified with the Web Crypto API. Zero tampering or invalid hashes detected.`
                     : verifyResult.reason}
                 </p>
               </div>
@@ -175,14 +175,14 @@ function AuditPage() {
             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Cari hash blok, tipe catatan, atau ID entitas..."
+              placeholder="Search block hash, record type, or entity ID..."
               value={searchHash}
               onChange={(e) => setSearchHash(e.target.value)}
               className="w-full rounded-lg border border-border bg-background pl-8 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
           <div className="text-xs text-muted-foreground font-mono">
-            Total Blok Tersimpan: <b className="text-foreground">{blocks.length}</b>
+            Total Blocks Stored: <b className="text-foreground">{blocks.length}</b>
           </div>
         </div>
 
@@ -196,7 +196,7 @@ function AuditPage() {
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 pb-3">
                 <div className="flex items-center gap-2.5">
                   <span className="rounded-lg bg-primary/20 text-primary border border-primary/30 px-2.5 py-1 text-xs font-mono font-bold">
-                    Blok #{b.index}
+                    Block #{b.index}
                   </span>
                   <span className="font-semibold text-foreground text-sm">{b.record_type}</span>
                   <span className="rounded bg-muted px-2 py-0.5 text-[11px] font-mono text-muted-foreground">
@@ -225,7 +225,7 @@ function AuditPage() {
                       className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 font-sans text-[10px]"
                     >
                       <Copy className="h-3 w-3" />
-                      {copiedHash === b.block_hash ? "Tersalin!" : "Salin"}
+                      {copiedHash === b.block_hash ? "Copied!" : "Copy"}
                     </button>
                   </div>
                   <p className="truncate text-primary font-bold text-[11px]">{b.block_hash}</p>
@@ -238,7 +238,7 @@ function AuditPage() {
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-purple-400" />
                     <span className="font-semibold text-purple-300">Polygon Amoy Consensus:</span>
-                    <span className="font-mono text-foreground">Blok #{b.polygon_block_number}</span>
+                    <span className="font-mono text-foreground">Block #{b.polygon_block_number}</span>
                     <span className="font-mono text-[10px] text-muted-foreground truncate max-w-[200px]">
                       ({b.polygon_block_hash?.slice(0, 16)}...)
                     </span>
@@ -249,7 +249,7 @@ function AuditPage() {
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-400 hover:text-purple-300 hover:underline"
                   >
-                    <span>Verifikasi di Polygonscan</span>
+                    <span>Verify on Polygonscan</span>
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
@@ -260,7 +260,7 @@ function AuditPage() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-semibold text-foreground flex items-center gap-1.5">
                     <Lock className="h-3 w-3 text-emerald-500" />
-                    Payload Data Terenkripsi & Terstempel:
+                    Cryptographically Stamped Payload:
                   </span>
                   <span className="font-mono text-[10px] text-muted-foreground">
                     Payload Hash: {b.payload_hash.slice(0, 16)}...
@@ -287,10 +287,10 @@ function AuditPage() {
             <div>
               <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
                 <Code className="h-4 w-4 text-primary" />
-                Spesifikasi Smart Contract: IncidentRegistry.sol
+                Smart Contract Specification: IncidentRegistry.sol
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Target Jaringan: Polygon Amoy Testnet (Chain ID: 80002) / Base Sepolia (Chain ID: 84532)
+                Target Networks: Polygon Amoy Testnet (Chain ID: 80002) / Base Sepolia (Chain ID: 84532)
               </p>
             </div>
             <span className="rounded bg-primary/20 text-primary px-2.5 py-1 text-xs font-mono font-bold">
@@ -307,8 +307,8 @@ contract IncidentRegistry {
         bytes32 incidentId;
         bytes32 payloadHash;
         uint256 timestamp;
-        uint8 severity; // 0: Rendah, 1: Sedang, 2: Tinggi, 3: Sangat Tinggi
-        uint8 status;   // 0: Created, 1: Verifying, 2: Verified, 3: Dispatched, 4: Resolved
+        uint8 severity; // 0: Low, 1: Moderate, 2: High, 3: Critical
+        uint8 status;   // 0: Draft, 1: UnderVerification, 2: Verified, 3: ActiveResponse, 4: Resolved
         address validator;
     }
 

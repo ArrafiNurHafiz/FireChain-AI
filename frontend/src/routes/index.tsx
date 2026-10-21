@@ -32,7 +32,7 @@ export const Route = createFileRoute("/")({
       { title: "FireChain AI — Real-Time Kalimantan Peatland Fire & Climate Ledger" },
       {
         name: "description",
-        content: "Pemantauan titik panas NASA FIRMS, kalkulasi risiko FWI, dan audit trail blockchain untuk kebakaran hutan & lahan gambut Kalimantan.",
+        content: "NASA FIRMS thermal hotspot surveillance, Canadian FWI risk index, and decentralized blockchain audit trail for Kalimantan peatlands.",
       },
     ],
   }),
@@ -118,17 +118,17 @@ function DashboardIndex() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="rounded-full bg-primary/20 px-2.5 py-0.5 text-[11px] font-bold text-primary uppercase tracking-wider">
-                Sistem Deteksi Aktif
+                Active Detection System
               </span>
               <span className="text-xs text-muted-foreground font-mono">
                 Satellites: NOAA-20 / Suomi-NPP VIIRS (375m NRT)
               </span>
             </div>
             <h2 className="text-xl font-bold tracking-tight text-foreground">
-              Dashboard Operasional Kebakaran Gambut Kalimantan
+              Kalimantan Peatland Wildfire Operations Dashboard
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Data terverifikasi satelit NASA FIRMS terintegrasi Open-Meteo & pembukuan emisi terdesentralisasi.
+              Verified NASA FIRMS satellite data integrated with Open-Meteo & decentralized climate emissions ledger.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -138,20 +138,20 @@ function DashboardIndex() {
               className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted transition disabled:opacity-50"
             >
               <RefreshCw className={`h-3.5 w-3.5 text-primary ${isSyncing ? "animate-spin" : ""}`} />
-              {isSyncing ? "Menyinkronkan..." : "Sinkronkan NASA"}
+              {isSyncing ? "Syncing..." : "Sync NASA FIRMS"}
             </button>
             <Link
               to="/reports"
               className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow hover:bg-primary/90 transition"
             >
               <Flame className="h-3.5 w-3.5" />
-              Lapor Titik Api
+              Report Incident
             </Link>
             <Link
               to="/map"
               className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 py-2 text-xs font-semibold text-foreground hover:bg-muted transition"
             >
-              Buka Peta Interaktif
+              Open Interactive Map
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -161,7 +161,7 @@ function DashboardIndex() {
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm hover:border-primary/40 transition">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-muted-foreground">Titik Panas Satelit (24 Jam)</span>
+              <span className="text-xs font-medium text-muted-foreground">Active Hotspots (24h)</span>
               <div className="rounded-lg bg-red-500/10 p-2 text-red-500">
                 <Flame className="h-5 w-5" />
               </div>
@@ -175,7 +175,7 @@ function DashboardIndex() {
 
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm hover:border-accent/40 transition">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-muted-foreground">Area Gambut Rawan</span>
+              <span className="text-xs font-medium text-muted-foreground">Vulnerable Peat Area</span>
               <div className="rounded-lg bg-orange-500/10 p-2 text-orange-500">
                 <ShieldAlert className="h-5 w-5" />
               </div>
@@ -184,26 +184,26 @@ function DashboardIndex() {
               {emissions.estimated_burned_area_ha.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">ha</span>
             </p>
             <p className="mt-2 text-xs text-orange-500 flex items-center gap-1">
-              <TrendingUp className="h-3.5 w-3.5" /> Berdasarkan jejak termal FRP
+              <TrendingUp className="h-3.5 w-3.5" /> Calculated from FRP thermal footprint
             </p>
           </div>
 
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm hover:border-emerald-500/40 transition">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-muted-foreground">Laporan Terverifikasi</span>
+              <span className="text-xs font-medium text-muted-foreground">Verified Field Reports</span>
               <div className="rounded-lg bg-emerald-500/10 p-2 text-emerald-500">
                 <FileCheck className="h-5 w-5" />
               </div>
             </div>
             <p className="text-3xl font-extrabold text-foreground font-mono">{reports.length}</p>
             <p className="mt-2 text-xs text-emerald-500 flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5" /> Seluruhnya tersimpan di ledger
+              <CheckCircle2 className="h-3.5 w-3.5" /> All anchored to ledger
             </p>
           </div>
 
           <div className="rounded-xl border border-border bg-card p-4 shadow-sm hover:border-blue-500/40 transition">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-muted-foreground">Emisi Dihindari (IPCC)</span>
+              <span className="text-xs font-medium text-muted-foreground">Avoided Emissions (IPCC)</span>
               <div className="rounded-lg bg-blue-500/10 p-2 text-blue-500">
                 <Shield className="h-5 w-5" />
               </div>
@@ -213,7 +213,7 @@ function DashboardIndex() {
               <span className="text-sm font-normal text-muted-foreground">tCO₂e</span>
             </p>
             <p className="mt-2 text-xs text-blue-400">
-              Dari 18 aksi cepat mitigasi gambut
+              From verified fast peat mitigation actions
             </p>
           </div>
         </section>
@@ -224,13 +224,13 @@ function DashboardIndex() {
           <div className="lg:col-span-2 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-foreground">Sebaran Spasial Titik Panas & Lahan Gambut</h3>
+                <h3 className="text-sm font-bold text-foreground">Spatial Distribution of Hotspots & Peatlands</h3>
                 <p className="text-xs text-muted-foreground">
-                  Peta interaktif Leaflet: data NASA FIRMS + Poligon KHG Lahan Gambut KLHK.
+                  Interactive Leaflet map: NASA FIRMS data + KLHK Peatland Hydrological Units (KHG).
                 </p>
               </div>
               <Link to="/map" className="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
-                Layar Penuh <ExternalLink className="h-3 w-3" />
+                Full Screen <ExternalLink className="h-3 w-3" />
               </Link>
             </div>
             <LiveMap hotspots={hotspots} className="h-[460px] w-full" />
@@ -244,8 +244,8 @@ function DashboardIndex() {
                 <div className="flex items-center gap-2">
                   <CloudSun className="h-5 w-5 text-yellow-500" />
                   <div>
-                    <h4 className="text-xs font-bold text-foreground">Cuaca Real-Time (Open-Meteo)</h4>
-                    <p className="text-[11px] text-muted-foreground">Stasiun Palangka Raya, Kalteng</p>
+                    <h4 className="text-xs font-bold text-foreground">Real-Time Weather (Open-Meteo)</h4>
+                    <p className="text-[11px] text-muted-foreground">Palangka Raya Station, Central Kal</p>
                   </div>
                 </div>
                 <span className="rounded bg-muted px-2 py-0.5 text-[10px] font-mono text-muted-foreground">
@@ -258,35 +258,35 @@ function DashboardIndex() {
                   <div className="flex items-baseline justify-between">
                     <span className="text-3xl font-extrabold font-mono text-foreground">{weather.temp}°C</span>
                     <span className="text-xs text-muted-foreground">
-                      Tekanan: <b className="text-foreground">{weather.pressure} hPa</b>
+                      Pressure: <b className="text-foreground">{weather.pressure} hPa</b>
                     </span>
                   </div>
                   <div className="grid grid-cols-3 gap-2 border-t border-border/60 pt-2 text-center text-xs">
                     <div className="rounded bg-muted/40 p-1.5">
-                      <p className="text-[10px] text-muted-foreground">Kelembapan</p>
+                      <p className="text-[10px] text-muted-foreground">Humidity</p>
                       <p className="font-bold text-foreground font-mono">{weather.humidity}%</p>
                     </div>
                     <div className="rounded bg-muted/40 p-1.5">
-                      <p className="text-[10px] text-muted-foreground">Curah Hujan</p>
+                      <p className="text-[10px] text-muted-foreground">Precipitation</p>
                       <p className="font-bold text-foreground font-mono">{weather.rain} mm</p>
                     </div>
                     <div className="rounded bg-muted/40 p-1.5">
-                      <p className="text-[10px] text-muted-foreground">Kecepatan Angin</p>
-                      <p className="font-bold text-foreground font-mono">{weather.wind_speed} km/j</p>
+                      <p className="text-[10px] text-muted-foreground">Wind Speed</p>
+                      <p className="font-bold text-foreground font-mono">{weather.wind_speed} km/h</p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground">Memuat data cuaca...</p>
+                <p className="text-xs text-muted-foreground">Loading weather telemetry...</p>
               )}
             </div>
 
             {/* Latest Verified Reports */}
             <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-xs font-bold text-foreground">Laporan Terkini di Lapangan</h4>
+                <h4 className="text-xs font-bold text-foreground">Latest Field Incident Reports</h4>
                 <Link to="/reports" className="text-xs text-primary font-semibold hover:underline">
-                  Lihat Semua
+                  View All
                 </Link>
               </div>
 
@@ -342,7 +342,7 @@ function DashboardIndex() {
                   <div className="text-xs space-y-1">
                     <p className="font-semibold text-foreground font-mono text-[11px]">{aiPred.model_name}</p>
                     <p className="text-muted-foreground text-[11px]">
-                      Smoldering: <b className="text-red-400 font-mono">{aiPred.smoldering_probability_pct}%</b> | Laju: <b className="text-foreground font-mono">{aiPred.spread_rate_m_hr} m/j</b>
+                      Smoldering: <b className="text-red-400 font-mono">{aiPred.smoldering_probability_pct}%</b> | Spread: <b className="text-foreground font-mono">{aiPred.spread_rate_m_hr} m/h</b>
                     </p>
                     <p className="text-[10px] text-muted-foreground font-mono">
                       Inference Latency: {aiPred.inference_time_ms} ms (Edge)
@@ -369,20 +369,20 @@ function DashboardIndex() {
                 </div>
 
                 <p className="rounded-lg bg-muted/60 p-2.5 text-[11px] text-muted-foreground leading-relaxed border border-border/50">
-                  <b className="text-foreground">Rekomendasi Taktis AI:</b> {aiPred.tactical_directive}
+                  <b className="text-foreground">AI Tactical Directive:</b> {aiPred.tactical_directive}
                 </p>
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground">Menjalankan inferensi model AI...</p>
+              <p className="text-xs text-muted-foreground">Running AI model inference...</p>
             )}
           </div>
 
           {/* 2. Cryptographic Blockchain Audit Trail (Polygon Amoy Live) */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-bold text-foreground">Audit Trail Blockchain</h4>
+              <h4 className="text-sm font-bold text-foreground">Blockchain Audit Trail</h4>
               <span className="flex items-center gap-1 text-xs text-emerald-500 font-semibold">
-                <CheckCircle2 className="h-3.5 w-3.5" /> Polygon Amoy Valid
+                <CheckCircle2 className="h-3.5 w-3.5" /> Polygon Amoy Verified
               </span>
             </div>
 
@@ -391,10 +391,10 @@ function DashboardIndex() {
                 <div key={b.index} className="rounded-lg border border-border/60 bg-muted/30 p-2.5 text-xs space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="rounded bg-primary/20 text-primary px-1.5 py-0.2 font-mono text-[10px] font-bold">
-                      Blok #{b.index}
+                      Block #{b.index}
                     </span>
                     <span className="text-[10px] text-muted-foreground">
-                      {new Date(b.timestamp).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB
+                      {new Date(b.timestamp).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })} UTC
                     </span>
                   </div>
                   <p className="font-semibold text-foreground text-[11px]">{b.record_type}</p>
@@ -423,7 +423,7 @@ function DashboardIndex() {
                 to="/audit"
                 className="flex items-center justify-between text-xs font-semibold text-primary hover:underline"
               >
-                <span>Periksa Integritas Rantai (Merkle Tree)</span>
+                <span>Verify Cryptographic Chain (Merkle Tree)</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
@@ -432,14 +432,14 @@ function DashboardIndex() {
           {/* 3. IPCC Carbon Emissions Calculation */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-bold text-foreground">Akuntansi Karbon (IPCC Tier 2)</h4>
+              <h4 className="text-sm font-bold text-foreground">Carbon Accounting (IPCC Tier 2)</h4>
               <span className="rounded bg-emerald-500/20 text-emerald-500 px-2 py-0.5 text-[10px] font-bold font-mono">
                 Wetlands 2013
               </span>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground">Estimasi Emisi Dihindari</p>
+              <p className="text-xs text-muted-foreground">Avoided Emissions Estimate</p>
               <p className="text-2xl font-extrabold font-mono text-emerald-500 mt-0.5">
                 {emissions.avoided_emissions_tco2e.toLocaleString()}{" "}
                 <span className="text-xs font-normal text-muted-foreground">tCO₂e</span>
@@ -448,19 +448,19 @@ function DashboardIndex() {
 
             <div className="space-y-2 border-t border-border/60 pt-3 text-xs">
               <div className="flex justify-between text-[11px]">
-                <span className="text-muted-foreground">Total FRP Akumulasi:</span>
+                <span className="text-muted-foreground">Accumulated FRP:</span>
                 <span className="font-mono font-bold text-foreground">{emissions.total_frp_mw.toLocaleString()} MW</span>
               </div>
               <div className="flex justify-between text-[11px]">
-                <span className="text-muted-foreground">Biomassa Gambut Terbakar:</span>
-                <span className="font-mono font-bold text-foreground">{emissions.biomass_consumed_ton.toLocaleString()} Ton</span>
+                <span className="text-muted-foreground">Biomass Consumed:</span>
+                <span className="font-mono font-bold text-foreground">{emissions.biomass_consumed_ton.toLocaleString()} Tons</span>
               </div>
               <div className="flex justify-between text-[11px]">
-                <span className="text-muted-foreground">Emisi CO₂ (1.703 t/t DM):</span>
+                <span className="text-muted-foreground">CO₂ Emissions (1,703 g/kg DM):</span>
                 <span className="font-mono font-bold text-foreground">{emissions.co2_tco2e.toLocaleString()} tCO₂e</span>
               </div>
               <div className="flex justify-between text-[11px]">
-                <span className="text-muted-foreground">Emisi Metana CH₄ (GWP 28):</span>
+                <span className="text-muted-foreground">Methane CH₄ (GWP 28):</span>
                 <span className="font-mono font-bold text-foreground">{emissions.ch4_tco2e.toLocaleString()} tCO₂e</span>
               </div>
             </div>
@@ -470,7 +470,7 @@ function DashboardIndex() {
                 to="/emissions"
                 className="flex items-center justify-between text-xs font-semibold text-primary hover:underline"
               >
-                <span>Lihat Metodologi & Rincian Formula</span>
+                <span>View Full Methodology & Carbon Model</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
