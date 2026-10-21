@@ -12,16 +12,18 @@ import {
   TrendingUp,
   MapPin,
   ExternalLink,
+  RefreshCw,
 } from "lucide-react";
 import { AppLayout } from "../components/AppLayout";
 import { LiveMap } from "../components/LiveMap";
 import { getAllHotspots, getHotspotStats } from "../lib/firms";
+import { fetchLiveFirmsHotspots } from "../lib/server-firms";
 import { fetchLiveWeather } from "../lib/weather";
 import { calculateFWI } from "../lib/fwi";
 import { calculateEmissions } from "../lib/emissions";
 import { getLedgerBlocks } from "../lib/blockchain";
 import { getIncidentReports } from "../lib/reports-store";
-import { WeatherData, FWIResult, AuditBlock, IncidentReport } from "../lib/types";
+import { WeatherData, FWIResult, AuditBlock, IncidentReport, Hotspot } from "../lib/types";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -37,13 +39,31 @@ export const Route = createFileRoute("/")({
 });
 
 function DashboardIndex() {
-  const hotspots = getAllHotspots();
+  const [hotspots, setHotspots] = useState<Hotspot[]>(getAllHotspots);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [lastSynced, setLastSynced] = useState<string>("Satelit VIIRS NRT");
+
   const stats = getHotspotStats(hotspots);
 
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [fwi, setFwi] = useState<FWIResult | null>(null);
   const [reports, setReports] = useState<IncidentReport[]>(getIncidentReports);
   const [blocks, setBlocks] = useState<AuditBlock[]>(getLedgerBlocks);
+
+  const handleSyncFirms = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetchLiveFirmsHotspots({ data: { force: true } });
+      if (res?.hotspots && res.hotspots.length > 0) {
+        setHotspots(res.hotspots);
+        setLastSynced(new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB");
+      }
+    } catch (err) {
+      console.warn("Gagal sinkronisasi live NASA:", err);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   useEffect(() => {
     // 1. Fetch real weather for Palangka Raya (center of Central Kalimantan peatlands)
@@ -56,6 +76,13 @@ function DashboardIndex() {
     // 2. Load incidents and ledger blocks
     setReports(getIncidentReports());
     setBlocks(getLedgerBlocks());
+
+    // 3. Periodic automatic sync (every 15 minutes)
+    const interval = setInterval(() => {
+      handleSyncFirms();
+    }, 15 * 60 * 1000);
+
+    return () => clearInterval(interval);
   }, [stats.total]);
 
   // IPCC real carbon emissions
@@ -89,7 +116,15 @@ function DashboardIndex() {
               Data terverifikasi satelit NASA FIRMS terintegrasi Open-Meteo & pembukuan emisi terdesentralisasi.
             </p>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              onClick={handleSyncFirms}
+              disabled={isSyncing}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted transition disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 text-primary ${isSyncing ? "animate-spin" : ""}`} />
+              {isSyncing ? "Menyinkronkan..." : "Sinkronkan NASA"}
+            </button>
             <Link
               to="/reports"
               className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow hover:bg-primary/90 transition"
