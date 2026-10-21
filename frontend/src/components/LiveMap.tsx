@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { Hotspot, PeatlandZone } from "../lib/types";
 import rawPeatlands from "../data/peatlands.json";
-import { Wind, Radio, Compass, Flame, ShieldAlert, Sparkles } from "lucide-react";
+import { Flame, Sparkles, Zap } from "lucide-react";
 
 interface LiveMapProps {
   hotspots: Hotspot[];
@@ -22,126 +22,88 @@ export function LiveMap({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const tileLayerRef = useRef<any>(null);
-  const markersLayerRef = useRef<any>(null);
+  const canvasRendererRef = useRef<any>(null);
+  const canvasLayerRef = useRef<any>(null);
+  const pulseLayerRef = useRef<any>(null);
   const peatlandLayerRef = useRef<any>(null);
 
   const [showHotspots, setShowHotspots] = useState(true);
   const [showPeatlands, setShowPeatlands] = useState(true);
+  const [showRadarPulse, setShowRadarPulse] = useState(true);
   const [baseLayerType, setBaseLayerType] = useState<"satellite" | "osm">("satellite");
   const [isClient, setIsClient] = useState(false);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<"all" | "high" | "peatland">("all");
+  const [filterMode, setFilterMode] = useState<"all" | "critical">("all");
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Helper to create dynamic HTML marker icons
-  const createFireIcon = (L: any, h: Hotspot) => {
-    let size = 18;
-    let html = "";
-
-    if (h.frp >= 20 || h.confidence === "high") {
-      size = 32;
-      html = `
-        <div class="fire-marker-container" style="width: 32px; height: 32px;">
-          <div class="fire-wave fire-wave-red" style="width: 30px; height: 30px;"></div>
-          <div class="fire-wave fire-wave-orange" style="width: 22px; height: 22px; animation-delay: 0.6s;"></div>
-          <div class="fire-core-flame" style="width: 14px; height: 14px; background: radial-gradient(circle, #fef08a 0%, #ef4444 85%); box-shadow: 0 0 14px rgba(239,68,68,1), 0 0 4px #fff; border: 1.5px solid #ffffff;"></div>
-        </div>
-      `;
-    } else if (h.frp >= 10 || h.confidence === "nominal") {
-      size = 24;
-      html = `
-        <div class="fire-marker-container" style="width: 24px; height: 24px;">
-          <div class="fire-wave fire-wave-orange" style="width: 22px; height: 22px;"></div>
-          <div class="fire-core-flame" style="width: 11px; height: 11px; background: radial-gradient(circle, #ffedd5 0%, #f97316 85%); box-shadow: 0 0 10px rgba(249,115,22,0.9); border: 1.5px solid #ffffff;"></div>
-        </div>
-      `;
-    } else {
-      size = 18;
-      html = `
-        <div class="fire-marker-container" style="width: 18px; height: 18px;">
-          <div style="width: 8px; height: 8px; border-radius: 9999px; background: #eab308; box-shadow: 0 0 8px #eab308; border: 1.5px solid #ffffff; transition: transform 0.2s;"></div>
-        </div>
-      `;
-    }
-
-    return L.divIcon({
-      html,
-      className: "custom-fire-div-icon",
-      iconSize: [size, size],
-      iconAnchor: [size / 2, size / 2],
-      popupAnchor: [0, -size / 2],
-    });
-  };
-
-  // Helper to render Hotspots
-  const renderHotspots = (
+  // High-performance Canvas Batch Renderer (0 DOM Overhead)
+  const renderCanvasHotspots = (
     L: any,
-    group: any,
+    canvasGroup: any,
+    pulseGroup: any,
     spots: Hotspot[],
     visible: boolean,
-    filterMode: "all" | "high" | "peatland",
+    isCriticalOnly: boolean,
+    allowPulse: boolean,
     onSelect?: (h: Hotspot) => void
   ) => {
-    group.clearLayers();
+    canvasGroup.clearLayers();
+    pulseGroup.clearLayers();
     if (!visible) return;
 
-    let filteredSpots = spots;
-    if (filterMode === "high") {
-      filteredSpots = spots.filter((h) => h.frp >= 20 || h.confidence === "high");
+    const renderer = canvasRendererRef.current || L.canvas({ padding: 0.3 });
+
+    let activeSpots = spots;
+    if (isCriticalOnly) {
+      activeSpots = spots.filter((h) => h.frp >= 20 || h.confidence === "high");
     }
 
-    // Render up to 750 high-priority spots for smooth 60fps interaction
-    const displaySpots = filteredSpots.slice(0, 750);
+    // 1. Render all points onto a single GPU Canvas (0 DOM elements!)
+    activeSpots.forEach((h) => {
+      let color = "#eab308";
+      let radius = 3;
+      let opacity = 0.75;
 
-    displaySpots.forEach((h) => {
-      const icon = createFireIcon(L, h);
-      const marker = L.marker([h.latitude, h.longitude], { icon });
+      if (h.frp >= 20 || h.confidence === "high") {
+        color = "#ef4444";
+        radius = 5.5;
+        opacity = 0.95;
+      } else if (h.frp >= 10 || h.confidence === "nominal") {
+        color = "#f97316";
+        radius = 4;
+        opacity = 0.85;
+      }
 
-      let badgeColor = "#eab308";
-      if (h.frp >= 20 || h.confidence === "high") badgeColor = "#ef4444";
-      else if (h.frp >= 10) badgeColor = "#f97316";
+      const marker = L.circleMarker([h.latitude, h.longitude], {
+        renderer,
+        radius,
+        fillColor: color,
+        color: "#ffffff",
+        weight: 1,
+        fillOpacity: opacity,
+      });
 
       marker.bindPopup(`
-        <div style="font-family: inherit; font-size: 12px; color: #f4f4f5; padding: 12px; min-width: 230px; line-height: 1.4;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.15); pb-2;">
-            <div style="display:flex; align-items:center; gap: 4px;">
-              <span style="display:inline-block; width: 8px; height: 8px; border-radius: 9999px; background: ${badgeColor}; box-shadow: 0 0 8px ${badgeColor};"></span>
-              <b style="color: #ffffff; font-size: 13px; font-family: monospace;">${h.id}</b>
-            </div>
-            <span style="background: ${badgeColor}33; color: ${badgeColor}; border: 1px solid ${badgeColor}66; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">
+        <div style="font-family: inherit; font-size: 12px; color: #f4f4f5; padding: 12px; min-width: 220px; line-height: 1.4;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 4px;">
+            <b style="color: #ffffff; font-size: 13px; font-family: monospace;">${h.id}</b>
+            <span style="background: ${color}33; color: ${color}; border: 1px solid ${color}66; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">
               ${h.confidence.toUpperCase()}
             </span>
           </div>
-
-          <div style="margin-bottom: 8px; space-y: 4px;">
-            <div style="display:flex; justify-content:space-between; font-size: 11px;">
-              <span style="color: #a1a1aa;">Wilayah:</span>
-              <b style="color: #ffffff;">${h.province}</b>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size: 11px;">
-              <span style="color: #a1a1aa;">Koordinat:</span>
-              <span style="color: #ffffff; font-family: monospace;">${h.latitude.toFixed(4)}, ${h.longitude.toFixed(4)}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size: 11px;">
-              <span style="color: #a1a1aa;">Intensitas Radiasi:</span>
-              <b style="color: ${badgeColor}; font-family: monospace;">${h.frp} MW</b>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size: 11px;">
-              <span style="color: #a1a1aa;">Suhu Termal Satelit:</span>
-              <span style="color: #ffffff; font-family: monospace;">${h.bright_ti4} K (${(h.bright_ti4 - 273.15).toFixed(1)} °C)</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size: 11px;">
-              <span style="color: #a1a1aa;">Waktu Rekam:</span>
-              <span style="color: #a1a1aa; font-family: monospace;">${h.acq_date} ${h.acq_time} UTC</span>
-            </div>
+          <div style="font-size: 11px; space-y: 3px;">
+            <div><span style="color:#a1a1aa;">Provinsi:</span> <b>${h.province}</b></div>
+            <div><span style="color:#a1a1aa;">Koordinat:</span> <span style="font-family: monospace;">${h.latitude.toFixed(4)}, ${h.longitude.toFixed(4)}</span></div>
+            <div><span style="color:#a1a1aa;">Radiasi FRP:</span> <b style="color: ${color}; font-family: monospace;">${h.frp} MW</b></div>
+            <div><span style="color:#a1a1aa;">Suhu Termal:</span> <span style="font-family: monospace;">${h.bright_ti4} K (${(h.bright_ti4 - 273.15).toFixed(1)} °C)</span></div>
+            <div><span style="color:#a1a1aa;">Waktu Rekam:</span> <span style="font-family: monospace;">${h.acq_date} ${h.acq_time} UTC</span></div>
           </div>
-
-          <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; margin-top: 6px;">
-            <a href="/reports" style="display: flex; align-items:center; justify-content:center; gap: 6px; width: 100%; background: #ef4444; color: #ffffff; padding: 6px 10px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: 700; box-shadow: 0 4px 10px rgba(239,68,68,0.4);">
-              <span>🚨 Verifikasi & Tangani Titik Ini</span>
+          <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px; margin-top: 6px;">
+            <a href="/reports" style="display: block; text-align: center; background: #ef4444; color: #fff; padding: 5px 8px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: 700;">
+              🚨 Tangani Titik Ini
             </a>
           </div>
         </div>
@@ -151,32 +113,62 @@ export function LiveMap({
         marker.on("click", () => onSelect(h));
       }
 
-      group.addLayer(marker);
+      canvasGroup.addLayer(marker);
     });
+
+    // 2. ONLY the top 5 most critical fires get the pulsing radar wave (super lightweight: only 5 DOM elements!)
+    if (allowPulse) {
+      const topCritical = activeSpots
+        .filter((h) => h.frp >= 25 || h.confidence === "high")
+        .slice(0, 5);
+
+      topCritical.forEach((h) => {
+        const pulseIcon = L.divIcon({
+          className: "top-critical-pulse",
+          html: `
+            <div class="fire-marker-container" style="width: 24px; height: 24px; pointer-events: none;">
+              <div class="fire-wave fire-wave-red" style="width: 24px; height: 24px;"></div>
+              <div style="width: 8px; height: 8px; border-radius: 9999px; background: #ffffff; box-shadow: 0 0 10px #ef4444;"></div>
+            </div>
+          `,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+        });
+
+        const pulseMarker = L.marker([h.latitude, h.longitude], {
+          icon: pulseIcon,
+          interactive: false,
+        });
+
+        pulseGroup.addLayer(pulseMarker);
+      });
+    }
   };
 
-  // Helper to render Peatland polygons
+  // Helper to render Peatlands
   const renderPeatlands = (L: any, group: any) => {
     group.clearLayers();
+    const renderer = canvasRendererRef.current || L.canvas({ padding: 0.3 });
     const peatlands = rawPeatlands as PeatlandZone[];
 
     peatlands.forEach((p) => {
       const polygon = L.polygon(p.coordinates, {
+        renderer,
         color: "#f59e0b",
         fillColor: "#b45309",
-        fillOpacity: 0.35,
-        weight: 2,
-        dashArray: "6, 6",
+        fillOpacity: 0.3,
+        weight: 1.5,
+        dashArray: "4, 4",
       });
 
       polygon.bindPopup(`
-        <div style="font-family: inherit; font-size: 12px; color: #f4f4f5; padding: 10px; line-height: 1.4;">
+        <div style="font-family: inherit; font-size: 12px; color: #f4f4f5; padding: 8px; line-height: 1.4;">
           <b style="color: #f59e0b; font-size: 13px;">${p.name}</b><br/>
           <div style="margin-top: 4px; font-size: 11px; color: #a1a1aa;">
             <div><b>Provinsi:</b> ${p.province}</div>
-            <div><b>Kedalaman Gambut:</b> ${p.depth_class}</div>
-            <div><b>Luas Area:</b> ${(p.area_ha || 0).toLocaleString()} ha</div>
-            <div><b>Stok Karbon Kritis:</b> ${p.carbon_density_ton_ha} ton C/ha</div>
+            <div><b>Kedalaman:</b> ${p.depth_class}</div>
+            <div><b>Luas:</b> ${(p.area_ha || 0).toLocaleString()} ha</div>
+            <div><b>Stok Karbon:</b> ${p.carbon_density_ton_ha} ton C/ha</div>
           </div>
         </div>
       `);
@@ -192,22 +184,21 @@ export function LiveMap({
 
     import("leaflet").then((L) => {
       delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-      });
 
-      // Center: Kalimantan (-1.5, 114.0)
+      // Enable Hardware-accelerated Canvas renderer
+      const canvasRenderer = L.canvas({ padding: 0.3 });
+      canvasRendererRef.current = canvasRenderer;
+
       const map = L.map(mapContainerRef.current!, {
         center: [-1.5, 114.0],
         zoom: 6,
         zoomControl: false,
+        preferCanvas: true, // Native canvas rendering for ultra performance
       });
 
       L.control.zoom({ position: "topleft" }).addTo(map);
 
-      // ESRI World Imagery (Real High-res satellite)
+      // ESRI World Imagery (High-res satellite)
       const esriTile = L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         {
@@ -219,14 +210,25 @@ export function LiveMap({
       tileLayerRef.current = esriTile;
 
       const peatlandsGroup = L.layerGroup().addTo(map);
-      const markersGroup = L.layerGroup().addTo(map);
+      const canvasGroup = L.layerGroup().addTo(map);
+      const pulseGroup = L.layerGroup().addTo(map);
 
       mapInstanceRef.current = map;
-      markersLayerRef.current = markersGroup;
+      canvasLayerRef.current = canvasGroup;
+      pulseLayerRef.current = pulseGroup;
       peatlandLayerRef.current = peatlandsGroup;
 
       renderPeatlands(L, peatlandsGroup);
-      renderHotspots(L, markersGroup, hotspots, showHotspots, activeFilter, onSelectHotspot);
+      renderCanvasHotspots(
+        L,
+        canvasGroup,
+        pulseGroup,
+        hotspots,
+        showHotspots,
+        filterMode === "critical",
+        showRadarPulse,
+        onSelectHotspot
+      );
 
       setLeafletLoaded(true);
 
@@ -234,7 +236,7 @@ export function LiveMap({
         if (mapInstanceRef.current) {
           mapInstanceRef.current.invalidateSize();
         }
-      }, 250);
+      }, 200);
     });
 
     return () => {
@@ -245,7 +247,7 @@ export function LiveMap({
     };
   }, [isClient]);
 
-  // Handle Base Layer Switch (Satellite vs OSM)
+  // Handle Base Layer Switch
   const switchBaseLayer = (type: "satellite" | "osm") => {
     if (!mapInstanceRef.current || !tileLayerRef.current) return;
     setBaseLayerType(type);
@@ -274,31 +276,38 @@ export function LiveMap({
     });
   };
 
-  // Update Hotspot Markers when hotspots change, filter changes, or visibility toggled
+  // Update Canvas Markers when hotspots change or filter changes
   useEffect(() => {
-    if (!mapInstanceRef.current || !markersLayerRef.current || !leafletLoaded) return;
+    if (
+      !mapInstanceRef.current ||
+      !canvasLayerRef.current ||
+      !pulseLayerRef.current ||
+      !leafletLoaded
+    )
+      return;
 
     import("leaflet").then((L) => {
-      renderHotspots(
+      renderCanvasHotspots(
         L,
-        markersLayerRef.current,
+        canvasLayerRef.current,
+        pulseLayerRef.current,
         hotspots,
         showHotspots,
-        activeFilter,
+        filterMode === "critical",
+        showRadarPulse,
         onSelectHotspot
       );
     });
-  }, [hotspots, showHotspots, activeFilter, leafletLoaded, onSelectHotspot]);
+  }, [hotspots, showHotspots, filterMode, showRadarPulse, leafletLoaded, onSelectHotspot]);
 
-  // Center on selected hotspot with smooth flyTo animation
+  // Center on selected hotspot
   useEffect(() => {
     if (!mapInstanceRef.current || !selectedHotspot) return;
     mapInstanceRef.current.flyTo(
       [selectedHotspot.latitude, selectedHotspot.longitude],
       10,
       {
-        duration: 1.4,
-        easeLinearity: 0.25,
+        duration: 0.8,
       }
     );
   }, [selectedHotspot]);
@@ -320,7 +329,7 @@ export function LiveMap({
   const recenterKalimantan = () => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.flyTo([-1.5, 114.0], 6, {
-        duration: 1.2,
+        duration: 0.8,
       });
     }
   };
@@ -328,7 +337,7 @@ export function LiveMap({
   const zoomToProvince = (lat: number, lon: number, zoom: number = 7) => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.flyTo([lat, lon], zoom, {
-        duration: 1.2,
+        duration: 0.8,
       });
     }
   };
@@ -337,40 +346,39 @@ export function LiveMap({
     <div className={`relative overflow-hidden rounded-xl border border-border bg-card shadow-2xl ${className}`}>
       <div ref={mapContainerRef} className="h-full w-full" />
 
-      {/* Top Floating HUD: Live Radar Scan & Quick Filter Pills */}
+      {/* Top Floating HUD: Fast Filter & Canvas Mode */}
       <div className="absolute top-3 left-12 z-[1000] flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-2 rounded-lg border border-primary/40 bg-background/90 px-3 py-1.5 text-xs shadow-lg backdrop-blur-md">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+        <div className="flex items-center gap-2 rounded-lg border border-primary/40 bg-background/90 px-2.5 py-1 text-xs shadow-lg backdrop-blur-md">
+          <Zap className="h-3.5 w-3.5 text-yellow-500" />
+          <span className="font-bold text-foreground tracking-wide font-mono text-[11px]">
+            CANVAS 60FPS
           </span>
-          <span className="font-bold text-foreground tracking-wide font-mono">VIIRS 375m THERMAL SCAN</span>
         </div>
 
-        {/* Quick Filter Mode */}
+        {/* Quick Filter */}
         <div className="flex items-center rounded-lg border border-border/80 bg-background/90 p-1 text-xs shadow-md backdrop-blur-md">
           <button
             type="button"
-            onClick={() => setActiveFilter("all")}
-            className={`rounded px-2.5 py-1 font-semibold transition ${
-              activeFilter === "all"
+            onClick={() => setFilterMode("all")}
+            className={`rounded px-2.5 py-1 font-semibold transition text-xs ${
+              filterMode === "all"
                 ? "bg-primary text-primary-foreground shadow"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Semua Titik ({hotspots.length})
+            Semua ({hotspots.length})
           </button>
           <button
             type="button"
-            onClick={() => setActiveFilter("high")}
-            className={`rounded px-2.5 py-1 font-semibold transition flex items-center gap-1 ${
-              activeFilter === "high"
+            onClick={() => setFilterMode("critical")}
+            className={`rounded px-2.5 py-1 font-semibold transition flex items-center gap-1 text-xs ${
+              filterMode === "critical"
                 ? "bg-red-600 text-white shadow"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <Flame className="h-3 w-3" />
-            Prioritas Kritis (&gt;20 MW)
+            Kritis (&gt;20 MW)
           </button>
         </div>
       </div>
@@ -380,12 +388,12 @@ export function LiveMap({
         <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-2">
           {/* Base Layer Switcher */}
           <div className="rounded-lg border border-border/80 bg-background/95 p-2 text-xs shadow-lg backdrop-blur-md">
-            <p className="mb-1.5 font-semibold text-foreground">Tampilan Peta</p>
+            <p className="mb-1 font-semibold text-foreground text-[11px]">Tampilan Peta</p>
             <div className="flex gap-1">
               <button
                 type="button"
                 onClick={() => switchBaseLayer("satellite")}
-                className={`rounded px-2.5 py-1 font-medium transition ${
+                className={`rounded px-2 py-1 font-medium transition text-[11px] ${
                   baseLayerType === "satellite"
                     ? "bg-primary text-primary-foreground font-semibold"
                     : "bg-muted text-muted-foreground hover:text-foreground"
@@ -396,65 +404,65 @@ export function LiveMap({
               <button
                 type="button"
                 onClick={() => switchBaseLayer("osm")}
-                className={`rounded px-2.5 py-1 font-medium transition ${
+                className={`rounded px-2 py-1 font-medium transition text-[11px] ${
                   baseLayerType === "osm"
                     ? "bg-primary text-primary-foreground font-semibold"
                     : "bg-muted text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Peta Jalan (OSM)
+                OSM
               </button>
             </div>
           </div>
 
           {/* Overlays */}
-          <div className="rounded-lg border border-border/80 bg-background/95 p-3 text-xs shadow-lg backdrop-blur-md">
-            <p className="mb-2 font-semibold text-foreground">Layer Tematik</p>
-            <div className="space-y-1.5">
-              <label className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground">
+          <div className="rounded-lg border border-border/80 bg-background/95 p-2.5 text-xs shadow-lg backdrop-blur-md">
+            <p className="mb-1.5 font-semibold text-foreground text-[11px]">Layer & Performa</p>
+            <div className="space-y-1">
+              <label className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground text-[11px]">
                 <input
                   type="checkbox"
                   checked={showHotspots}
                   onChange={(e) => setShowHotspots(e.target.checked)}
                   className="rounded border-border accent-primary"
                 />
-                <span className="font-medium text-foreground">Hotspot Aktif (Live FIRMS)</span>
+                <span className="font-medium text-foreground">Titik Panas FIRMS</span>
               </label>
-              <label className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground">
+              <label className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground text-[11px]">
                 <input
                   type="checkbox"
                   checked={showPeatlands}
                   onChange={(e) => setShowPeatlands(e.target.checked)}
                   className="rounded border-border accent-accent"
                 />
-                <span className="font-medium text-foreground">Kawasan Gambut (KHG KLHK)</span>
+                <span className="font-medium text-foreground">Kawasan Gambut</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground text-[11px]">
+                <input
+                  type="checkbox"
+                  checked={showRadarPulse}
+                  onChange={(e) => setShowRadarPulse(e.target.checked)}
+                  className="rounded border-border accent-primary"
+                />
+                <span className="font-medium text-foreground">Efek Pulsa Top 5</span>
               </label>
             </div>
           </div>
 
-          {/* FRP Intensity Animated Legend */}
-          <div className="rounded-lg border border-border/80 bg-background/95 p-3 text-xs shadow-lg backdrop-blur-md">
-            <p className="mb-2 font-semibold text-foreground flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              Intensitas Radiasi (FRP)
-            </p>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2.5">
-                <span className="relative flex h-3.5 w-3.5 items-center justify-center">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
-                </span>
+          {/* FRP Intensity Legend */}
+          <div className="rounded-lg border border-border/80 bg-background/95 p-2.5 text-xs shadow-lg backdrop-blur-md">
+            <p className="mb-1 font-semibold text-foreground text-[11px]">Intensitas FRP</p>
+            <div className="space-y-1 text-[11px]">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-red-500 border border-white" />
                 <span className="font-medium text-foreground">Kritis (&gt; 20 MW)</span>
               </div>
-              <div className="flex items-center gap-2.5">
-                <span className="relative flex h-3 w-3 items-center justify-center">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-50"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500 border border-white"></span>
-                </span>
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-orange-500 border border-white" />
                 <span className="text-muted-foreground">Sedang (10 - 20 MW)</span>
               </div>
-              <div className="flex items-center gap-2.5">
-                <span className="h-2 w-2 rounded-full bg-yellow-400 border border-white ml-0.5" />
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 border border-white" />
                 <span className="text-muted-foreground">Rendah (&lt; 10 MW)</span>
               </div>
             </div>
@@ -463,40 +471,40 @@ export function LiveMap({
       )}
 
       {/* Province Quick Jump Smooth Bar */}
-      <div className="absolute bottom-3 left-3 z-[1000] flex flex-wrap gap-1.5 rounded-lg border border-border/80 bg-background/95 p-1.5 text-xs shadow-lg backdrop-blur-md">
+      <div className="absolute bottom-3 left-3 z-[1000] flex flex-wrap gap-1 rounded-lg border border-border/80 bg-background/95 p-1 text-xs shadow-lg backdrop-blur-md">
         <button
           onClick={recenterKalimantan}
-          className="rounded px-2.5 py-1 font-semibold text-foreground transition hover:bg-muted"
+          className="rounded px-2 py-0.5 font-semibold text-foreground transition hover:bg-muted text-[11px]"
         >
           Semua Kalimantan
         </button>
         <button
           onClick={() => zoomToProvince(-2.21, 113.92)}
-          className="rounded px-2 py-1 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium"
+          className="rounded px-1.5 py-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium text-[11px]"
         >
           KalTeng
         </button>
         <button
           onClick={() => zoomToProvince(-0.02, 109.34)}
-          className="rounded px-2 py-1 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium"
+          className="rounded px-1.5 py-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium text-[11px]"
         >
           KalBar
         </button>
         <button
           onClick={() => zoomToProvince(-3.32, 114.59)}
-          className="rounded px-2 py-1 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium"
+          className="rounded px-1.5 py-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium text-[11px]"
         >
           KalSel
         </button>
         <button
           onClick={() => zoomToProvince(-0.50, 117.15)}
-          className="rounded px-2 py-1 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium"
+          className="rounded px-1.5 py-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium text-[11px]"
         >
           KalTim
         </button>
         <button
           onClick={() => zoomToProvince(2.84, 117.37)}
-          className="rounded px-2 py-1 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium"
+          className="rounded px-1.5 py-0.5 text-muted-foreground transition hover:bg-muted hover:text-foreground font-medium text-[11px]"
         >
           KalTara
         </button>
