@@ -1,0 +1,25 @@
+# Dependencies & Builds
+node_modules/
+dist/
+dist-ssr/
+.output/
+.vinxi/
+.tanstack/
+.nitro/
+.vercel/
+.wrangler/
+*.log
+
+# Environment & Editor
+.env
+.env.local
+.dev.vars
+.vscode/
+.idea/
+.DS_Store
+
+# Temporary & intermediate production files
+firechain-code.zip
+video-production/out_*.mp4
+video-production/recordings/
+video-production/node_modules/
