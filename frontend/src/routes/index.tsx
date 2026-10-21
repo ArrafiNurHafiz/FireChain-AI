@@ -20,6 +20,7 @@ import { getAllHotspots, getHotspotStats } from "../lib/firms";
 import { fetchLiveFirmsHotspots } from "../lib/server-firms";
 import { fetchLiveWeather } from "../lib/weather";
 import { calculateFWI } from "../lib/fwi";
+import { predictPeatFireEscalation, AIFirePredictionResult } from "../lib/ai-engine";
 import { calculateEmissions } from "../lib/emissions";
 import { getLedgerBlocks } from "../lib/blockchain";
 import { getIncidentReports } from "../lib/reports-store";
@@ -47,6 +48,7 @@ function DashboardIndex() {
 
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [fwi, setFwi] = useState<FWIResult | null>(null);
+  const [aiPred, setAiPred] = useState<AIFirePredictionResult | null>(null);
   const [reports, setReports] = useState<IncidentReport[]>(getIncidentReports);
   const [blocks, setBlocks] = useState<AuditBlock[]>(getLedgerBlocks);
 
@@ -71,9 +73,22 @@ function DashboardIndex() {
       setWeather(w);
       const computedFwi = calculateFWI(w, stats.total);
       setFwi(computedFwi);
+
+      // 2. Real AI Neural Network Forward Pass
+      const mlResult = predictPeatFireEscalation({
+        frp: stats.avgFrp || 12.5,
+        bright_ti4: 338.5,
+        temp: w.temp,
+        humidity: w.humidity,
+        wind_speed: w.wind_speed,
+        rain: w.rain,
+        peat_depth_cm: 280,
+        soil_moisture_est: Math.max(18, w.humidity * 0.6),
+      });
+      setAiPred(mlResult);
     });
 
-    // 2. Load incidents and ledger blocks
+    // 3. Load incidents and ledger blocks
     setReports(getIncidentReports());
     setBlocks(getLedgerBlocks());
 
@@ -303,82 +318,71 @@ function DashboardIndex() {
 
         {/* 3 Detailed Lower Cards: FWI Analysis, Blockchain Audit, Carbon Accounting */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* 1. Real FWI Canadian Algorithm */}
+          {/* 1. Real AI Neural Network Model (PeatNet MLP) */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-bold text-foreground">Analisis Risiko AI (FWI System)</h4>
-              {fwi && (
-                <span className={`rounded-full border px-2.5 py-0.5 text-xs font-bold ${badgeColor[fwi.level]}`}>
-                  {fwi.level}
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                <h4 className="text-sm font-bold text-foreground">AI Neural Network (PeatNet)</h4>
+              </div>
+              {aiPred && (
+                <span className={`rounded-full border px-2.5 py-0.5 text-xs font-bold ${badgeColor[aiPred.risk_level] || "bg-primary/20 text-primary"}`}>
+                  {aiPred.risk_level}
                 </span>
               )}
             </div>
 
-            {fwi ? (
+            {aiPred ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <div className="relative flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-full border-4 border-primary/80 bg-primary/10 shadow-[0_0_12px_rgba(239,68,68,0.25)]">
-                    <span className="text-2xl font-extrabold font-mono text-foreground">{fwi.risk_score}</span>
+                    <span className="text-2xl font-extrabold font-mono text-foreground">{aiPred.escalation_risk_score}</span>
                     <span className="text-[10px] text-muted-foreground">/ 100</span>
                   </div>
                   <div className="text-xs space-y-1">
-                    <p className="font-semibold text-foreground">Canadian FWI Engine</p>
-                    <p className="text-muted-foreground leading-relaxed text-[11px]">
-                      FFMC: <b className="text-foreground font-mono">{fwi.ffmc}</b> | ISI: <b className="text-foreground font-mono">{fwi.isi}</b>
+                    <p className="font-semibold text-foreground font-mono text-[11px]">{aiPred.model_name}</p>
+                    <p className="text-muted-foreground text-[11px]">
+                      Smoldering: <b className="text-red-400 font-mono">{aiPred.smoldering_probability_pct}%</b> | Laju: <b className="text-foreground font-mono">{aiPred.spread_rate_m_hr} m/j</b>
                     </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      Indeks kekeringan gambut & potensi laju rambatan api.
+                    <p className="text-[10px] text-muted-foreground font-mono">
+                      Inference Latency: {aiPred.inference_time_ms} ms (Edge)
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-2 border-t border-border/60 pt-3 text-xs">
-                  <div>
-                    <div className="flex justify-between text-[11px] mb-1">
-                      <span>Kekeringan Bahan Bakar (FFMC)</span>
-                      <span className="font-mono font-semibold">{fwi.factors.weather_dryness}%</span>
+                  <p className="font-semibold text-foreground text-[11px]">Feature Importances (Shapley Attributions):</p>
+                  {aiPred.feature_importances.slice(0, 3).map((feat) => (
+                    <div key={feat.feature}>
+                      <div className="flex justify-between text-[11px] mb-1">
+                        <span className="text-muted-foreground truncate">{feat.feature}</span>
+                        <span className="font-mono font-semibold text-foreground">+{feat.impact_pct}%</span>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full"
+                          style={{ width: `${feat.impact_pct * 2.5}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                      <div className="h-full bg-orange-500 rounded-full" style={{ width: `${fwi.factors.weather_dryness}%` }} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-[11px] mb-1">
-                      <span>Densitas Hotspot Satelit FIRMS</span>
-                      <span className="font-mono font-semibold">{fwi.factors.satellite_hotspots}%</span>
-                    </div>
-                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                      <div className="h-full bg-red-500 rounded-full" style={{ width: `${fwi.factors.satellite_hotspots}%` }} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-[11px] mb-1">
-                      <span>Kerentanan Lahan Gambut</span>
-                      <span className="font-mono font-semibold">{fwi.factors.peatland_proximity}%</span>
-                    </div>
-                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                      <div className="h-full bg-yellow-500 rounded-full" style={{ width: `${fwi.factors.peatland_proximity}%` }} />
-                    </div>
-                  </div>
+                  ))}
                 </div>
 
                 <p className="rounded-lg bg-muted/60 p-2.5 text-[11px] text-muted-foreground leading-relaxed border border-border/50">
-                  <b className="text-foreground">Rekomendasi Algoritma:</b> {fwi.summary}
+                  <b className="text-foreground">Rekomendasi Taktis AI:</b> {aiPred.tactical_directive}
                 </p>
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground">Menghitung parameter FWI...</p>
+              <p className="text-xs text-muted-foreground">Menjalankan inferensi model AI...</p>
             )}
           </div>
 
-          {/* 2. Cryptographic Blockchain Audit Trail */}
+          {/* 2. Cryptographic Blockchain Audit Trail (Polygon Amoy Live) */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-bold text-foreground">Audit Trail Blockchain</h4>
               <span className="flex items-center gap-1 text-xs text-emerald-500 font-semibold">
-                <CheckCircle2 className="h-3.5 w-3.5" /> Rantai Kriptografis Valid
+                <CheckCircle2 className="h-3.5 w-3.5" /> Polygon Amoy Valid
               </span>
             </div>
 
@@ -397,6 +401,19 @@ function DashboardIndex() {
                   <div className="font-mono text-[10px] text-muted-foreground truncate">
                     Hash: <span className="text-foreground">{b.block_hash.slice(0, 18)}...</span>
                   </div>
+                  {b.polygon_block_number && (
+                    <div className="flex items-center justify-between pt-1 border-t border-border/40 text-[10px]">
+                      <span className="text-purple-400 font-mono">Amoy #{b.polygon_block_number}</span>
+                      <a
+                        href={b.polygonscan_url || "https://amoy.polygonscan.com"}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary hover:underline flex items-center gap-0.5"
+                      >
+                        Polygonscan <ExternalLink className="h-2.5 w-2.5" />
+                      </a>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

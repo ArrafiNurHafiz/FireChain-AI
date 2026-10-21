@@ -14,6 +14,7 @@ import {
 import { AppLayout } from "../components/AppLayout";
 import { fetchAllProvincesWeather } from "../lib/weather";
 import { calculateFWI } from "../lib/fwi";
+import { predictPeatFireEscalation, AIFirePredictionResult } from "../lib/ai-engine";
 import { getAllHotspots } from "../lib/firms";
 import { WeatherData, FWIResult } from "../lib/types";
 
@@ -31,6 +32,28 @@ function RiskPage() {
   const [weatherMap, setWeatherMap] = useState<Record<string, WeatherData>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  // AI Neural Network Simulator State
+  const [simFrp, setSimFrp] = useState<number>(28);
+  const [simTemp, setSimTemp] = useState<number>(34);
+  const [simHumidity, setSimHumidity] = useState<number>(45);
+  const [simWind, setSimWind] = useState<number>(18);
+  const [simPeatDepth, setSimPeatDepth] = useState<number>(280);
+  const [aiPred, setAiPred] = useState<AIFirePredictionResult | null>(null);
+
+  useEffect(() => {
+    const res = predictPeatFireEscalation({
+      frp: simFrp,
+      bright_ti4: 335 + simFrp * 0.4,
+      temp: simTemp,
+      humidity: simHumidity,
+      wind_speed: simWind,
+      rain: 0,
+      peat_depth_cm: simPeatDepth,
+      soil_moisture_est: Math.max(15, simHumidity * 0.6),
+    });
+    setAiPred(res);
+  }, [simFrp, simTemp, simHumidity, simWind, simPeatDepth]);
 
   const hotspots = getAllHotspots();
 
@@ -180,6 +203,158 @@ function RiskPage() {
               </div>
             );
           })}
+        </section>
+
+        {/* Interactive AI Neural Network Simulator (PeatNet) */}
+        <section className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/60 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-primary animate-pulse" />
+              <div>
+                <h3 className="font-bold text-sm text-foreground">
+                  Simulator AI Neural Network (FireChain PeatNet v2.4)
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Simulasi interaktif inferensi MLP multi-variat: prediksi probabilitas api bawah tanah (smoldering) & laju rambat perimeter per jam.
+                </p>
+              </div>
+            </div>
+            {aiPred && (
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs text-muted-foreground">Inference: {aiPred.inference_time_ms}ms</span>
+                <span className={`rounded-full border px-3 py-0.5 text-xs font-bold ${badgeColor[aiPred.risk_level] || "bg-primary/20 text-primary"}`}>
+                  {aiPred.risk_level} ({aiPred.escalation_risk_score}/100)
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Input Controls */}
+            <div className="space-y-4 text-xs">
+              <div>
+                <div className="flex justify-between mb-1.5 font-medium">
+                  <span className="text-foreground">Daya Radiasi Satelit NASA (FRP):</span>
+                  <span className="font-mono font-bold text-primary">{simFrp} MW</span>
+                </div>
+                <input
+                  type="range"
+                  min="2"
+                  max="120"
+                  step="1"
+                  value={simFrp}
+                  onChange={(e) => setSimFrp(Number(e.target.value))}
+                  className="w-full accent-primary cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-1.5 font-medium">
+                  <span className="text-foreground">Temperatur Udara Ambien:</span>
+                  <span className="font-mono font-bold text-yellow-500">{simTemp} °C</span>
+                </div>
+                <input
+                  type="range"
+                  min="24"
+                  max="42"
+                  step="0.5"
+                  value={simTemp}
+                  onChange={(e) => setSimTemp(Number(e.target.value))}
+                  className="w-full accent-yellow-500 cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-1.5 font-medium">
+                  <span className="text-foreground">Kelembapan Relatif (RH):</span>
+                  <span className="font-mono font-bold text-blue-400">{simHumidity} %</span>
+                </div>
+                <input
+                  type="range"
+                  min="20"
+                  max="95"
+                  step="1"
+                  value={simHumidity}
+                  onChange={(e) => setSimHumidity(Number(e.target.value))}
+                  className="w-full accent-blue-500 cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-1.5 font-medium">
+                  <span className="text-foreground">Kecepatan Angin 10m:</span>
+                  <span className="font-mono font-bold text-foreground">{simWind} km/j</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="45"
+                  step="1"
+                  value={simWind}
+                  onChange={(e) => setSimWind(Number(e.target.value))}
+                  className="w-full accent-foreground cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-1.5 font-medium">
+                  <span className="text-foreground">Ketebalan Lahan Gambut (KHG):</span>
+                  <span className="font-mono font-bold text-amber-500">{simPeatDepth} cm</span>
+                </div>
+                <input
+                  type="range"
+                  min="50"
+                  max="500"
+                  step="10"
+                  value={simPeatDepth}
+                  onChange={(e) => setSimPeatDepth(Number(e.target.value))}
+                  className="w-full accent-amber-500 cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* Neural Net Outputs & Tactical Directive */}
+            {aiPred && (
+              <div className="rounded-xl border border-border/70 bg-muted/20 p-4 space-y-4">
+                <div className="grid grid-cols-2 gap-3 text-center">
+                  <div className="rounded-lg bg-card p-3 border border-border/60">
+                    <p className="text-[11px] text-muted-foreground">Probabilitas Smoldering (Api Bawah Tanah)</p>
+                    <p className="text-2xl font-extrabold font-mono text-red-500 mt-0.5">
+                      {aiPred.smoldering_probability_pct}%
+                    </p>
+                    <span className="text-[10px] text-muted-foreground">Sigmoid Activation</span>
+                  </div>
+                  <div className="rounded-lg bg-card p-3 border border-border/60">
+                    <p className="text-[11px] text-muted-foreground">Proyeksi Laju Rambat Perimeter</p>
+                    <p className="text-2xl font-extrabold font-mono text-orange-500 mt-0.5">
+                      {aiPred.spread_rate_m_hr} <span className="text-xs font-normal">m/jam</span>
+                    </p>
+                    <span className="text-[10px] text-muted-foreground">Elliptical Wind Vector</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 text-xs">
+                  <p className="font-bold text-foreground text-[11px]">Feature Importances (Shapley Attributions):</p>
+                  {aiPred.feature_importances.slice(0, 4).map((f) => (
+                    <div key={f.feature} className="flex items-center justify-between text-[11px]">
+                      <span className="text-muted-foreground">{f.feature}</span>
+                      <span className="font-mono font-bold text-foreground">+{f.impact_pct}%</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-xs space-y-1">
+                  <span className="font-bold text-primary text-[11px] uppercase tracking-wide flex items-center gap-1.5">
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                    Instruksi Taktis AI ({aiPred.suppression_priority})
+                  </span>
+                  <p className="text-foreground text-[11px] leading-relaxed">
+                    {aiPred.tactical_directive}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </section>
 
         {/* Scientific Methodology Explainer Box */}

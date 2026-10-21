@@ -82,6 +82,10 @@ export interface AuditBlock {
   previous_hash: string;
   block_hash: string;
   validator: string;
+  polygon_block_number?: number;
+  polygon_block_hash?: string;
+  ecdsa_signature?: string;
+  polygonscan_url?: string;
 }
 
 export interface EmissionCalculation {

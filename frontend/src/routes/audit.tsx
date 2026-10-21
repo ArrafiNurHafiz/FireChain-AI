@@ -11,9 +11,12 @@ import {
   Lock,
   RefreshCw,
   Search,
+  Zap,
+  Globe,
 } from "lucide-react";
 import { AppLayout } from "../components/AppLayout";
 import { getLedgerBlocks, verifyAuditChain } from "../lib/blockchain";
+import { getPolygonAmoyStatus, PolygonNetworkStatus } from "../lib/polygon";
 import { AuditBlock } from "../lib/types";
 
 export const Route = createFileRoute("/audit")({
@@ -36,9 +39,11 @@ function AuditPage() {
   } | null>(null);
   const [searchHash, setSearchHash] = useState<string>("");
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
+  const [polygonStatus, setPolygonStatus] = useState<PolygonNetworkStatus | null>(null);
 
   useEffect(() => {
     setBlocks(getLedgerBlocks());
+    getPolygonAmoyStatus().then(setPolygonStatus);
   }, []);
 
   const runVerification = async () => {
@@ -71,28 +76,64 @@ function AuditPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-sm">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-500 uppercase tracking-wider font-mono">
-                Decentralized Registry
+              <span className="rounded bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider font-mono flex items-center gap-1">
+                <Globe className="h-3 w-3" /> Polygon Amoy Live RPC
               </span>
-              <span className="text-xs text-muted-foreground">EVM Compatible / Polygon Amoy</span>
+              <span className="text-xs text-muted-foreground">Chain ID: 80002 • EVM Public Consensus</span>
             </div>
             <h2 className="text-xl font-bold tracking-tight text-foreground">
-              Audit Trail Kriptografis Kebakaran Gambut
+              Audit Trail Kriptografis & On-Chain Consensus
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Setiap deteksi satelit, laporan lapangan, dan intervensi pemadaman diikat dalam rantai hash SHA-256 yang tidak dapat dimanipulasi.
+              Setiap deteksi satelit, laporan lapangan, dan intervensi pemadaman diikat rantai SHA-256 dan di-anchoring langsung ke jaringan Polygon Amoy.
             </p>
           </div>
 
-          <button
-            onClick={runVerification}
-            disabled={verifying}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-emerald-500 transition disabled:opacity-50"
-          >
-            <ShieldCheck className={`h-4 w-4 ${verifying ? "animate-spin" : ""}`} />
-            {verifying ? "Menghitung Hash..." : "Verifikasi Integritas Rantai"}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href="https://amoy.polygonscan.com"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted transition"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              Polygonscan Explorer
+            </a>
+            <button
+              onClick={runVerification}
+              disabled={verifying}
+              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-emerald-500 transition disabled:opacity-50"
+            >
+              <ShieldCheck className={`h-4 w-4 ${verifying ? "animate-spin" : ""}`} />
+              {verifying ? "Menghitung Hash..." : "Verifikasi Integritas Rantai"}
+            </button>
+          </div>
         </div>
+
+        {/* Live Polygon Amoy Network Bar */}
+        {polygonStatus && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="rounded-lg border border-border bg-card p-3 text-xs">
+              <span className="text-muted-foreground text-[11px]">Jaringan On-Chain</span>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <b className="text-foreground">{polygonStatus.networkName}</b>
+              </div>
+            </div>
+            <div className="rounded-lg border border-border bg-card p-3 text-xs">
+              <span className="text-muted-foreground text-[11px]">Blok Terkini (Live RPC)</span>
+              <p className="font-mono font-bold text-foreground text-sm mt-0.5">#{polygonStatus.blockNumber}</p>
+            </div>
+            <div className="rounded-lg border border-border bg-card p-3 text-xs">
+              <span className="text-muted-foreground text-[11px]">Gas Price Rata-rata</span>
+              <p className="font-mono font-bold text-foreground text-sm mt-0.5">{polygonStatus.gasPriceGwei} Gwei</p>
+            </div>
+            <div className="rounded-lg border border-border bg-card p-3 text-xs">
+              <span className="text-muted-foreground text-[11px]">Node Validator Posko</span>
+              <p className="font-mono text-purple-400 truncate text-[11px] mt-0.5">{polygonStatus.validatorAddress}</p>
+            </div>
+          </div>
+        )}
 
         {/* Verification Result Banner */}
         {verifyResult && (
@@ -190,6 +231,29 @@ function AuditPage() {
                   <p className="truncate text-primary font-bold text-[11px]">{b.block_hash}</p>
                 </div>
               </div>
+
+              {/* Polygon On-Chain Anchor Card */}
+              {b.polygon_block_number && (
+                <div className="rounded-lg bg-purple-500/10 border border-purple-500/20 p-2.5 text-xs flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-purple-400" />
+                    <span className="font-semibold text-purple-300">Polygon Amoy Consensus:</span>
+                    <span className="font-mono text-foreground">Blok #{b.polygon_block_number}</span>
+                    <span className="font-mono text-[10px] text-muted-foreground truncate max-w-[200px]">
+                      ({b.polygon_block_hash?.slice(0, 16)}...)
+                    </span>
+                  </div>
+                  <a
+                    href={b.polygonscan_url || `https://amoy.polygonscan.com/block/${b.polygon_block_number}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-400 hover:text-purple-300 hover:underline"
+                  >
+                    <span>Verifikasi di Polygonscan</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              )}
 
               {/* Payload details */}
               <div className="rounded-lg bg-background p-3 border border-border/60 text-xs">

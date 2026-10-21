@@ -13,6 +13,7 @@ import {
 import { AppLayout } from "../components/AppLayout";
 import { LiveMap } from "../components/LiveMap";
 import { getAllHotspots, filterHotspots, getHotspotStats } from "../lib/firms";
+import { predictPeatFireEscalation } from "../lib/ai-engine";
 import { Hotspot } from "../lib/types";
 
 export const Route = createFileRoute("/map")({
@@ -179,6 +180,46 @@ function MapPage() {
                       <span className="text-foreground">Suomi-NPP VIIRS (NASA)</span>
                     </div>
                   </div>
+
+                  {/* Real AI Neural Network Prediction for Selected Hotspot */}
+                  {(() => {
+                    const aiEval = predictPeatFireEscalation({
+                      frp: selectedHotspot.frp,
+                      bright_ti4: selectedHotspot.bright_ti4,
+                      temp: 32.5,
+                      humidity: 50,
+                      wind_speed: 14,
+                      rain: 0,
+                      peat_depth_cm: 250,
+                      soil_moisture_est: 28,
+                    });
+                    return (
+                      <div className="rounded-lg border border-primary/30 bg-primary/10 p-2.5 text-xs space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-foreground text-[11px] flex items-center gap-1">
+                            <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                            AI PeatNet Assessment
+                          </span>
+                          <span className="font-mono font-bold text-primary text-[11px]">
+                            {aiEval.risk_level} ({aiEval.escalation_risk_score}/100)
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-[10px]">
+                          <div>
+                            <span className="text-muted-foreground">Smoldering Prob:</span>
+                            <p className="font-mono font-bold text-red-400">{aiEval.smoldering_probability_pct}%</p>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Laju Rambat:</span>
+                            <p className="font-mono font-bold text-orange-400">{aiEval.spread_rate_m_hr} m/jam</p>
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground leading-tight pt-0.5">
+                          {aiEval.tactical_directive}
+                        </p>
+                      </div>
+                    );
+                  })()}
 
                   <div className="pt-2">
                     <a
