@@ -5,117 +5,117 @@ import { ChapterCue, SubtitleCue } from "./types";
 
 const SCENE1_CHAPTER: ChapterCue = {
   fromFrame: 0,
-  toFrame: 1030,
+  toFrame: 1109,
   number: "01",
-  title: "DETEKSI SATELIT & PENILAIAN RISIKO FWI",
-  subtitle: "NASA FIRMS VIIRS 375m & Open-Meteo Integration",
+  title: "SATELLITE DETECTION & PEATNET EARLY WARNING",
+  subtitle: "NASA FIRMS VIIRS 375m & AI Neural Inference",
 };
 
 const SCENE1_SUBS: SubtitleCue[] = [
   {
-    fromFrame: 10,
-    toFrame: 300,
-    text: "Di tengah ancaman kebakaran hutan dan lahan gambut Kalimantan, kecepatan deteksi dan transparansi adalah kunci penyelamatan iklim global.",
-    accentKeywords: ["kebakaran hutan", "lahan gambut Kalimantan", "iklim global"],
+    fromFrame: 15,
+    toFrame: 350,
+    text: "Across the vulnerable tropical peatlands of Kalimantan, early detection and transparent verification are essential for global climate action.",
+    accentKeywords: ["tropical peatlands", "early detection", "climate action"],
   },
   {
-    fromFrame: 300,
-    toFrame: 620,
-    text: "FireChain AI hadir memadukan telemetri satelit NASA FIRMS dan pembukuan terdesentralisasi.",
-    accentKeywords: ["FireChain AI", "NASA FIRMS", "terdesentralisasi"],
+    fromFrame: 350,
+    toFrame: 680,
+    text: "FireChain AI integrates live NASA FIRMS satellite telemetry with decentralized blockchain technology.",
+    accentKeywords: ["FireChain AI", "NASA FIRMS", "blockchain technology"],
   },
   {
-    fromFrame: 620,
-    toFrame: 1020,
-    text: "Begitu satelit Suomi-NPP VIIRS melintas, sistem langsung menyerap ribuan titik anomali termal dan menghitung indeks risiko cuaca secara real-time.",
-    accentKeywords: ["Suomi-NPP VIIRS", "anomali termal", "real-time"],
+    fromFrame: 680,
+    toFrame: 1100,
+    text: "As the Suomi-NPP VIIRS satellite passes overhead, the system ingests thousands of thermal anomalies, predicting subterranean smoldering ignition risk.",
+    accentKeywords: ["Suomi-NPP VIIRS", "thermal anomalies", "smoldering ignition risk"],
   },
 ];
 
 const SCENE2_CHAPTER: ChapterCue = {
   fromFrame: 0,
-  toFrame: 1092,
+  toFrame: 1060,
   number: "02",
-  title: "TARGETING SPASIAL & LIVE MAP 60 FPS",
-  subtitle: "High-Res ESRI Satellite & GPU Canvas Architecture",
+  title: "SPATIAL TARGETING & 60 FPS GPU SATELLITE MAP",
+  subtitle: "High-Res ESRI Satellite & Canvas Architecture",
 };
 
 const SCENE2_SUBS: SubtitleCue[] = [
   {
-    fromFrame: 10,
-    toFrame: 270,
-    text: "Langkah berikutnya: targeting spasial. Operator membuka Live Map resolusi tinggi satelit ESRI dengan engine akselerasi GPU Canvas 60 FPS.",
-    accentKeywords: ["targeting spasial", "ESRI", "GPU Canvas 60 FPS"],
+    fromFrame: 15,
+    toFrame: 340,
+    text: "Next: precision spatial targeting. Operators launch the high-resolution ESRI satellite Live Map, powered by a 60 FPS GPU Canvas rendering engine.",
+    accentKeywords: ["spatial targeting", "ESRI satellite", "60 FPS GPU Canvas"],
   },
   {
-    fromFrame: 270,
-    toFrame: 610,
-    text: "Dengan filter prioritas kritis, tim langsung mengisolasi titik api berdaya radiasi tinggi di atas 20 Megawatt.",
-    accentKeywords: ["prioritas kritis", "20 Megawatt"],
+    fromFrame: 340,
+    toFrame: 670,
+    text: "By toggling the Critical Priority filter, the team immediately isolates extreme hotspots exceeding 20 Megawatts.",
+    accentKeywords: ["Critical Priority", "20 Megawatts"],
   },
   {
-    fromFrame: 610,
-    toFrame: 1080,
-    text: "Inspektor titik panas memberikan telemetri presisi: koordinat geografis, suhu kecerahan, hingga kedalaman kesatuan hidrologis gambut.",
-    accentKeywords: ["telemetri presisi", "suhu kecerahan", "hidrologis gambut"],
+    fromFrame: 670,
+    toFrame: 1050,
+    text: "The Hotspot Inspector reveals exact GPS coordinates, brightness temperature, and automated AI PeatNet containment directives over Kalimantan's deep peat zones.",
+    accentKeywords: ["GPS coordinates", "brightness temperature", "AI PeatNet"],
   },
 ];
 
 const SCENE3_CHAPTER: ChapterCue = {
   fromFrame: 0,
-  toFrame: 1001,
+  toFrame: 1015,
   number: "03",
-  title: "MOBILISASI SATGAS & LOGGING ON-CHAIN",
-  subtitle: "Tamper-Proof Incident Registry Smart Contract",
+  title: "TASKFORCE MOBILIZATION & ON-CHAIN REGISTRY",
+  subtitle: "Tamper-Proof Incident Logging on Polygon Amoy",
 };
 
 const SCENE3_SUBS: SubtitleCue[] = [
   {
     fromFrame: 15,
-    toFrame: 270,
-    text: "Dari temuan spasial ini, operator langsung menerbitkan laporan penanganan terpadu. Koordinat GPS, tingkat keparahan, dan kondisi vegetasi dicatat resmi.",
-    accentKeywords: ["laporan penanganan", "Koordinat GPS"],
+    toFrame: 330,
+    text: "From this spatial intelligence, operators file an official field incident report. Exact GPS coordinates, peat depth, vegetation status, and severity are logged.",
+    accentKeywords: ["field incident report", "GPS coordinates", "severity"],
   },
   {
-    fromFrame: 270,
-    toFrame: 660,
-    text: "Yang membedakan FireChain AI: setiap laporan langsung dicetak permanen ke dalam blok kriptografis blockchain yang anti manipulasi.",
-    accentKeywords: ["FireChain AI", "blok kriptografis blockchain", "anti manipulasi"],
+    fromFrame: 330,
+    toFrame: 680,
+    text: "What sets FireChain AI apart: every report is cryptographically hashed with SHA-256 and anchored directly to the Polygon Amoy blockchain.",
+    accentKeywords: ["FireChain AI", "SHA-256", "Polygon Amoy blockchain"],
   },
   {
-    fromFrame: 660,
-    toFrame: 990,
-    text: "Status tindakan diperbarui, dan tim posko Manggala Agni segera dimobilisasi ke lapangan.",
-    accentKeywords: ["Status tindakan", "Manggala Agni", "dimobilisasi"],
+    fromFrame: 680,
+    toFrame: 1005,
+    text: "Field status transitions to Response Active as Manggala Agni firefighting units deploy with high-pressure trench pumps.",
+    accentKeywords: ["Response Active", "Manggala Agni", "firefighting units"],
   },
 ];
 
 const SCENE4_CHAPTER: ChapterCue = {
   fromFrame: 0,
-  toFrame: 1054,
+  toFrame: 1173,
   number: "04",
-  title: "AUDIT KRIPTOGRAFIS & AKUNTANSI IKLIM",
-  subtitle: "Web Crypto SHA-256 Verifier & IPCC Tier 2 Credits",
+  title: "CONSENSUS AUDIT & IPCC CARBON CREDITS",
+  subtitle: "Web Crypto SHA-256 Verifier & Tier 2 Carbon Accounting",
 };
 
 const SCENE4_SUBS: SubtitleCue[] = [
   {
     fromFrame: 15,
-    toFrame: 260,
-    text: "Setiap bukti tindakan dapat diaudit oleh publik dan pihak internasional.",
-    accentKeywords: ["diaudit", "internasional"],
+    toFrame: 330,
+    text: "Every operational action remains publicly verifiable and tamper-proof across international observers.",
+    accentKeywords: ["publicly verifiable", "tamper-proof"],
   },
   {
-    fromFrame: 260,
-    toFrame: 620,
-    text: "Di menu Blockchain Audit, operator menjalankan verifikasi SHA-256 independen untuk membuktikan integritas seluruh rantai data.",
-    accentKeywords: ["Blockchain Audit", "verifikasi SHA-256", "integritas"],
+    fromFrame: 330,
+    toFrame: 700,
+    text: "In the Blockchain Audit Trail, operators execute full SHA-256 consensus verification to prove immutable chain integrity with Polygonscan links.",
+    accentKeywords: ["Blockchain Audit Trail", "SHA-256 consensus", "Polygonscan"],
   },
   {
-    fromFrame: 620,
-    toFrame: 1040,
-    text: "Terakhir, modul Akuntansi Emisi Karbon IPCC menghitung biomassa gambut yang terselamatkan, menghasilkan ribuan ton emisi yang dihindari dan siap dikonversi menjadi kredit karbon berkualitas tinggi.",
-    accentKeywords: ["Akuntansi Emisi Karbon IPCC", "emisi yang dihindari", "kredit karbon"],
+    fromFrame: 700,
+    toFrame: 1165,
+    text: "Finally, the IPCC Tier 2 Carbon Accounting module calculates avoided greenhouse gas emissions, turning rapid ground suppression into certified, high-integrity carbon credits.",
+    accentKeywords: ["IPCC Tier 2 Carbon Accounting", "avoided emissions", "carbon credits"],
   },
 ];
 
@@ -125,7 +125,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="Scene1"
         component={SceneComponent}
-        durationInFrames={1030}
+        durationInFrames={1109}
         fps={30}
         width={1920}
         height={1080}
@@ -138,7 +138,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="Scene2"
         component={SceneComponent}
-        durationInFrames={1092}
+        durationInFrames={1060}
         fps={30}
         width={1920}
         height={1080}
@@ -151,7 +151,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="Scene3"
         component={SceneComponent}
-        durationInFrames={1001}
+        durationInFrames={1015}
         fps={30}
         width={1920}
         height={1080}
@@ -164,7 +164,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="Scene4"
         component={SceneComponent}
-        durationInFrames={1054}
+        durationInFrames={1173}
         fps={30}
         width={1920}
         height={1080}

@@ -14,7 +14,7 @@ async function recordScene(
   targetDurationMs: number,
   action: (page: any) => Promise<void>
 ) {
-  console.log(`[RECORDING] Starting ${name}...`);
+  console.log(`[RECORDING] Starting ${name} (target: ${targetDurationMs}ms)...`);
   const browser = await chromium.launch({
     headless: true,
     args: [
@@ -65,45 +65,45 @@ async function recordScene(
 }
 
 async function main() {
-  // Scene 1: Dashboard (~33s)
-  await recordScene("scene1", 33500, async (page) => {
+  // Scene 1: Dashboard (~37.2s)
+  await recordScene("scene1", 37200, async (page) => {
     await page.goto("http://localhost:8080/", { waitUntil: "networkidle" });
-    await sleep(2500);
+    await sleep(3000);
 
-    // Scroll slightly down to showcase KPI cards
-    await page.evaluate(() => window.scrollBy({ top: 120, behavior: "smooth" }));
+    // Scroll slightly down to showcase 4 live KPI cards
+    await page.evaluate(() => window.scrollBy({ top: 140, behavior: "smooth" }));
     await sleep(3500);
 
-    // Highlight weather & FWI section
-    await page.evaluate(() => window.scrollBy({ top: 380, behavior: "smooth" }));
+    // Scroll down to showcase Real-Time Weather & AI Neural Net (PeatNet)
+    await page.evaluate(() => window.scrollBy({ top: 400, behavior: "smooth" }));
     await sleep(4000);
 
-    // Hover over Canadian FWI engine
-    const fwiCard = await page.$("section:has-text('Analisis Risiko AI')");
-    if (fwiCard) await fwiCard.hover();
+    // Hover over AI PeatNet card
+    const aiCard = await page.$("h4:has-text('AI Neural Network')");
+    if (aiCard) await aiCard.hover();
     await sleep(4000);
 
-    // Scroll back top
+    // Scroll back to top
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-    await sleep(2000);
+    await sleep(2500);
 
-    // Click "Sinkronkan NASA" button
-    const syncBtn = await page.$("button:has-text('Sinkronkan NASA')");
+    // Click "Sync NASA FIRMS" button
+    const syncBtn = await page.$("button:has-text('Sync NASA FIRMS')");
     if (syncBtn) {
       await syncBtn.hover();
       await sleep(1000);
       await syncBtn.click();
     }
-    await sleep(5000);
+    await sleep(6000);
   });
 
-  // Scene 2: Live Map (~35s)
-  await recordScene("scene2", 35500, async (page) => {
+  // Scene 2: Live Map (~35.6s)
+  await recordScene("scene2", 35600, async (page) => {
     await page.goto("http://localhost:8080/map", { waitUntil: "networkidle" });
     await sleep(3500);
 
-    // Click "Prioritas Kritis (>20 MW)" filter
-    const critBtn = await page.$("button:has-text('Prioritas Kritis')");
+    // Click "Critical (>20 MW)" filter button
+    const critBtn = await page.$("button:has-text('Critical')");
     if (critBtn) {
       await critBtn.hover();
       await sleep(1000);
@@ -111,27 +111,27 @@ async function main() {
     }
     await sleep(4000);
 
-    // Click KalTeng smooth flyTo
-    const kalTengBtn = await page.$("button:has-text('KalTeng')");
-    if (kalTengBtn) {
-      await kalTengBtn.hover();
+    // Click "Central Kal" smooth flyTo
+    const centralKalBtn = await page.$("button:has-text('Central Kal')");
+    if (centralKalBtn) {
+      await centralKalBtn.hover();
       await sleep(1000);
-      await kalTengBtn.click();
+      await centralKalBtn.click();
     }
     await sleep(4500);
 
-    // Click a fire marker on canvas / map
+    // Click on canvas to select a hotspot
     const canvas = await page.$("canvas.leaflet-zoom-animated");
     if (canvas) {
       const box = await canvas.boundingBox();
       if (box) {
-        await page.mouse.click(box.x + box.width * 0.48, box.y + box.height * 0.52);
+        await page.mouse.click(box.x + box.width * 0.49, box.y + box.height * 0.51);
       }
     }
-    await sleep(4000);
+    await sleep(4500);
 
     // Recenter
-    const recenterBtn = await page.$("button:has-text('Semua Kalimantan')");
+    const recenterBtn = await page.$("button:has-text('All Kalimantan')");
     if (recenterBtn) {
       await recenterBtn.hover();
       await sleep(1000);
@@ -140,10 +140,10 @@ async function main() {
     await sleep(5000);
   });
 
-  // Scene 3: Incident Reporting (~32s)
-  await recordScene("scene3", 32500, async (page) => {
+  // Scene 3: Incident Reporting (~34.2s)
+  await recordScene("scene3", 34200, async (page) => {
     await page.goto("http://localhost:8080/reports", { waitUntil: "networkidle" });
-    await sleep(2500);
+    await sleep(3000);
 
     // Open create report modal
     const openBtn = await page.$("#btn-open-create-report");
@@ -152,16 +152,16 @@ async function main() {
       await sleep(1000);
       await openBtn.click();
     }
-    await sleep(2000);
+    await sleep(2500);
 
-    // Fill form
-    await page.fill("input[placeholder*='Titik Api']", "Titik Api Gambut Katingan Hilir KM 18");
+    // Fill form in English
+    await page.fill("input[placeholder*='Subterranean']", "Subterranean Peat Fire in Katingan Peat Reserve");
     await sleep(800);
-    await page.fill("input[placeholder*='Desa Hampalit']", "Kawasan Gambut Mentaya Hilir");
+    await page.fill("input[placeholder*='Hampalit Village']", "Hampalit Village, Katingan Hilir District");
     await sleep(800);
-    await page.fill("textarea", "Deteksi asap tebal terkonfirmasi visual ground-check. Api menjalar ke kedalaman gambut 1.5m.");
+    await page.fill("textarea", "Dense smoke and subterranean smoldering confirmed on 2.5m peat horizon. Joint taskforce executing canal water trenching.");
     await sleep(800);
-    await page.fill("input[placeholder='Nama Lengkap']", "Kapten Manggala Agni Arrafi");
+    await page.fill("input[placeholder='Full Name']", "Commander Budi Santoso");
     await sleep(1200);
 
     // Submit
@@ -171,18 +171,18 @@ async function main() {
       await sleep(800);
       await submitBtn.click();
     }
-    await sleep(3500);
+    await sleep(4000);
 
     // Open first report details
-    const detailBtn = await page.$("tbody tr:first-child button:has-text('Detail & Aksi')");
+    const detailBtn = await page.$("tbody tr:first-child button:has-text('Detail & Actions')");
     if (detailBtn) {
       await detailBtn.hover();
       await sleep(1000);
       await detailBtn.click();
-      await sleep(2000);
+      await sleep(2500);
 
       // Dispatch team
-      const dispatchBtn = await page.$("button:has-text('Tugaskan Tim')");
+      const dispatchBtn = await page.$("button:has-text('Dispatch Taskforce')");
       if (dispatchBtn) {
         await dispatchBtn.hover();
         await sleep(800);
@@ -196,27 +196,27 @@ async function main() {
     await sleep(3000);
   });
 
-  // Scene 4: Blockchain Audit & Carbon Impact (~34s)
-  await recordScene("scene4", 34500, async (page) => {
+  // Scene 4: Blockchain Audit & Carbon Impact (~39.5s)
+  await recordScene("scene4", 39500, async (page) => {
     await page.goto("http://localhost:8080/audit", { waitUntil: "networkidle" });
-    await sleep(2500);
+    await sleep(3000);
 
-    // Click "Verifikasi Integritas Rantai"
-    const verifyBtn = await page.$("button:has-text('Verifikasi Integritas')");
+    // Click "Verify Cryptographic Chain"
+    const verifyBtn = await page.$("button:has-text('Verify Cryptographic Chain')");
     if (verifyBtn) {
       await verifyBtn.hover();
       await sleep(1000);
       await verifyBtn.click();
     }
-    await sleep(4500);
+    await sleep(5500);
 
     // Scroll to Solidity contract
     await page.evaluate(() => window.scrollBy({ top: 380, behavior: "smooth" }));
-    await sleep(3000);
+    await sleep(3500);
 
     // Navigate to /emissions
     await page.goto("http://localhost:8080/emissions", { waitUntil: "networkidle" });
-    await sleep(2500);
+    await sleep(3000);
 
     // Interact with Avoided Emissions slider
     const slider = await page.$("input[type='range']");
@@ -226,20 +226,20 @@ async function main() {
       await page.evaluate(() => {
         const s = document.querySelector("input[type='range']") as HTMLInputElement;
         if (s) {
-          s.value = "36";
+          s.value = "38";
           s.dispatchEvent(new Event("input", { bubbles: true }));
           s.dispatchEvent(new Event("change", { bubbles: true }));
         }
       });
     }
-    await sleep(4000);
+    await sleep(4500);
 
     // Scroll down to scientific references
     await page.evaluate(() => window.scrollBy({ top: 250, behavior: "smooth" }));
-    await sleep(4000);
+    await sleep(4500);
   });
 
-  console.log("[ALL SCENES RECORDED SUCCESSFULLY!]");
+  console.log("[ALL SCENES RECORDED SUCCESSFULLY IN ENGLISH!]");
 }
 
 main();
